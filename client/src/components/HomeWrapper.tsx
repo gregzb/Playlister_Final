@@ -1,5 +1,6 @@
 import * as React from 'react'
+import {StatusBar} from "./StatusBar";
 
 export const HomeWrapper = () => {
-    return (<div>a</div>);
+    return (<><StatusBar></StatusBar></>);
 }

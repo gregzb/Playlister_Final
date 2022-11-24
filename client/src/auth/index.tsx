@@ -33,7 +33,6 @@ export const AuthContextProvider = (props: {
     children: React.ReactNode
 }) => {
     const [auth, setAuth] = useState(defaultAuthState);
-    // const nav = useNavigate();
 
     const authReducer = (action: { type: AuthActionType, payload: any }) => {
         const { type, payload } = action;
@@ -85,7 +84,8 @@ export const AuthContextProvider = (props: {
         setLoggedIn: async () => {
             const response = await getLoggedIn();
             if (!response) return authWithFunctions.setAccountError("Couldn't establish connection to server?");
-            if (!response.error) {
+            if (response.error === false) {
+                const v = response;
                 authReducer({
                     type: AuthActionType.SET_LOGGED_IN,
                     payload: {
@@ -93,11 +93,8 @@ export const AuthContextProvider = (props: {
                         user: response.user
                     }
                 });
-                // if (response.loggedIn) {
-                //     nav("/home");
-                // }
             } else {
-                const errMsg = response.errorMsg!;
+                const errMsg = response.errorMsg;
                 authWithFunctions.setAccountError(errMsg);
             }
         },
@@ -105,7 +102,7 @@ export const AuthContextProvider = (props: {
         register: async (username: string, firstName: string, lastName: string, email: string, password: string) => {
             const response = await register(username, firstName, lastName, email, password);
             if (!response) return authWithFunctions.setAccountError("Couldn't establish connection to server?");
-            if (!response.error) {
+            if (response.error === false) {
                 authReducer({
                     type: AuthActionType.SET_LOGGED_IN,
                     payload: {
@@ -123,7 +120,7 @@ export const AuthContextProvider = (props: {
         login: async (email: string, password: string) => {
             const response = await login(email, password);
             if (!response) return authWithFunctions.setAccountError("Couldn't establish connection to server?");
-            if (!response.error) {
+            if (response.error === false) {
                 authReducer({
                     type: AuthActionType.SET_LOGGED_IN,
                     payload: {
@@ -141,7 +138,7 @@ export const AuthContextProvider = (props: {
         logout: async () => {
             const response = await logout();
             if (!response) return authWithFunctions.setAccountError("Couldn't establish connection to server?");
-            if (!response.error) {
+            if (response.error === false) {
                 authReducer({
                     type: AuthActionType.SET_LOGGED_IN,
                     payload: {

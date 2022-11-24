@@ -8,21 +8,31 @@ export type User = {
 };
 
 type ErrT = {
-    error: boolean;
-    errorMsg?: string;
+    error: true;
+    errorMsg: string;
 };
 
-const exceptionWrapper = <T>(f: (...args: any[]) => T) => {
-    return async (...args) => {
+type SuccessT = {
+    error: false;
+};
+
+const exceptionWrapper = <T>(f: (...args: any[]) => Promise<ErrT | T>) => {
+    return async (...args: any[]): Promise<ErrT | T> => {
         try {
             return await f(...args);
         } catch (err) {
-            console.log(`Issue with function ${f.name}: ${err}`);
+            console.log(`Logged: Issue with function ${f.name}: ${err}`);
+            return new Promise((res) => {
+                res({
+                    error: true,
+                    errorMsg: `Issue with function ${f.name}: ${err}`
+                });
+            });
         }
     };
 }
 
-export const getLoggedIn = exceptionWrapper(async (): Promise<ErrT & {
+export const getLoggedIn = exceptionWrapper(async (): Promise<ErrT | SuccessT & {
     user: User;
     loggedIn: boolean;
 }> => {
@@ -33,7 +43,7 @@ export const getLoggedIn = exceptionWrapper(async (): Promise<ErrT & {
     return await res.json();
 });
 
-export const login = exceptionWrapper(async (email: string, password: string): Promise<ErrT & {
+export const login = exceptionWrapper(async (email: string, password: string): Promise<ErrT | SuccessT & {
     user: User;
 }> => {
     const loginObj = { email, password };
@@ -48,7 +58,7 @@ export const login = exceptionWrapper(async (email: string, password: string): P
     return await res.json();
 });
 
-export const logout = exceptionWrapper(async (): Promise<ErrT & {
+export const logout = exceptionWrapper(async (): Promise<ErrT | SuccessT & {
 
 }> => {
     const res = await fetch(`${baseUrl}/logout/`, {
@@ -58,7 +68,7 @@ export const logout = exceptionWrapper(async (): Promise<ErrT & {
     return await res.json();
 });
 
-export const register = exceptionWrapper(async (username, firstName, lastName, email, password): Promise<ErrT & {
+export const register = exceptionWrapper(async (username, firstName, lastName, email, password): Promise<ErrT | SuccessT & {
     user: User;
 }> => {
     const registerObj = { username, firstName, lastName, email, password };
