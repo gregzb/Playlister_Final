@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "es6",
+        "jsx": "react-jsx",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "moduleResolution": "node",
+        "allowJs": false
+        // "preserveConstEnums": true,
+        // "sourceMap": true
+    },
+    "files": [
+        "src/main.tsx",
+    ],
+}
