@@ -1,5 +1,6 @@
 import * as React from "react";
+import {StatusBar} from "./StatusBar";
 
 export const AppBanner = () => {
-    return (<div></div>);
+    return (<StatusBar></StatusBar>);
 };

@@ -13,7 +13,7 @@ import { RegisterScreen } from "./components/RegisterScreen";
 
 import { AppBanner } from "./components/AppBanner";
 
-export const App = () => {
+const App = () => {
     return (
         <BrowserRouter>
             <AuthContextProvider>
@@ -30,3 +30,5 @@ export const App = () => {
         </BrowserRouter>
     )
 }
+
+export default App;
