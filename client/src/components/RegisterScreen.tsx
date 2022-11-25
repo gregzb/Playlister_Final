@@ -18,16 +18,11 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 export const RegisterScreen = () => {
     const auth = useContext(AuthContext);
 
-    // console.log(auth.accountError);
-
     const handleSubmit = (event: React.SyntheticEvent) => {
         event.preventDefault();
-        // const t = event.currentTarget as HTMLFormElement;
         const formData = new FormData(event.currentTarget as HTMLFormElement);
         if (formData.get("password") !== formData.get("passwordVerify")) {
-            // console.log("a");
             auth.setAccountError("Password doesn't match password verification.");
-            // setTimeout(() => console.log(auth.accountError), 1000);
         } else {
             auth.register(
                 formData.get("username") as string,
@@ -36,7 +31,6 @@ export const RegisterScreen = () => {
                 formData.get('email') as string,
                 formData.get('password') as string);
         }
-        console.log(formData);
     };
     return (
         <>
