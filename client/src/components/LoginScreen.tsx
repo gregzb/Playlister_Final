@@ -1,12 +1,13 @@
 import * as React from 'react'
 import { useContext } from "react";
+import { Link } from "react-router-dom";
 
 import { AuthContext } from '../auth'
 import { AccountErrorModal } from "./AccountErrorModal";
 
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
-import Link from '@mui/material/Link';
+// import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -77,8 +78,10 @@ export const LoginScreen = () => {
                         </Button>
                         <Grid container justifyContent="flex-end">
                             <Grid item>
-                                <Link href="/register/" variant="body2">
-                                    Don't have an account yet? Sign up
+                                <Link to="/register">
+                                    <Typography variant="body2">
+                                        Already have an account? Sign in
+                                    </Typography>
                                 </Link>
                             </Grid>
                         </Grid>

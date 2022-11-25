@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -16,6 +17,7 @@ import logoUrl from '/assets/logo.png';
 
 export const AppBanner = () => {
     const auth = useContext(AuthContext);
+    const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
     const imageHeight = {
@@ -38,12 +40,24 @@ export const AppBanner = () => {
         setAnchorEl(null);
     };
 
+    const handleRegister = () => {
+        handleClose();
+        navigate("/register");
+    }
+
+    const handleLogin = () => {
+        handleClose();
+        navigate("/login");
+    }
+
     return (
         <AppBar sx={{ bgcolor: "rgb(224,224,224)" }} position="static">
             <Toolbar>
-                <Box sx={imageHeight}>
-                    <img height="100%" src={logoUrl}></img>
-                </Box>
+                <Link to="/">
+                    <Box sx={imageHeight}>
+                        <img height="100%" src={logoUrl}></img>
+                    </Box>
+                </Link>
                 <span style={{ flexGrow: 1 }}></span>
                 <IconButton
                     size="large"
@@ -74,8 +88,8 @@ export const AppBanner = () => {
                     {auth.loggedIn ? (
                         <MenuItem onClick={handleClose}>Logout</MenuItem>) : (
                         [
-                            <MenuItem key="create_acc" onClick={handleClose}>Create New Account</MenuItem>,
-                            <MenuItem key="login_acc" onClick={handleClose}>Login</MenuItem>
+                            <MenuItem key="create_acc" onClick={handleRegister}>Create New Account</MenuItem>,
+                            <MenuItem key="login_acc" onClick={handleLogin}>Login</MenuItem>
                         ]
                     )}
                 </Menu>
