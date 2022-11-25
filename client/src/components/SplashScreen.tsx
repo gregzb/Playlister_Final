@@ -1,15 +1,18 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
+import Link from '@mui/material/Link';
 
 //@ts-ignore
 import logoUrl from '/assets/logo.png';
 
 export const SplashScreen = () => {
+    const navigate = useNavigate();
     return (
         <Container maxWidth="md">
             <Grid
@@ -17,13 +20,13 @@ export const SplashScreen = () => {
                 spacing={2}
             >
                 <Grid item xs={12}>
-                    <Box sx={{ "text-align": "center" }}>
+                    <Box sx={{ "textAlign": "center" }}>
                         <img src={logoUrl}></img>
                     </Box>
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Box sx={{ "text-align": "center" }}>
+                    <Box sx={{ "textAlign": "center" }}>
                         <Typography align="center" variant="h4">Welcome to Playlister, your one stop solution for Playlist management and viewing!</Typography>
                     </Box>
                 </Grid>
@@ -37,10 +40,10 @@ export const SplashScreen = () => {
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Box sx={{ "text-align": "center" }}>
-                        <Button sx={{ m: 1 }} variant="contained">Register</Button>
-                        <Button sx={{ m: 1 }} variant="contained">Login</Button>
-                        <Button sx={{ m: 1 }} variant="contained">Continue as Guest</Button>
+                    <Box sx={{ "textAlign": "center" }}>
+                        <Button sx={{ m: 1 }} onClick={() => navigate("/register")} variant="contained">Register</Button>
+                        <Button sx={{ m: 1 }} onClick={() => navigate("/login")} variant="contained">Login</Button>
+                        <Button sx={{ m: 1 }} onClick={() => navigate("/home")} variant="contained">Continue as Guest</Button>
                     </Box>
                 </Grid>
                 <Grid item xs={12}>

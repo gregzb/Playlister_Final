@@ -1,7 +1,6 @@
 import * as React from "react";
 import { createContext, useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-import { redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {getLoggedIn, login, logout, register} from "./requests-api"
 import type {User} from "./requests-api";
 
@@ -20,6 +19,7 @@ const defaultAuthState: {
 
     setLoggedIn: () => void,
     setAccountError: (errMsg: string) => void,
+    clearAccountError: () => void,
     register: (username: string, firstName: string, lastName: string, email: string, password: string) => void,
     login: (email: string, password: string) => void,
     logout: () => void,
@@ -34,6 +34,7 @@ const defaultAuthState: {
 
     setLoggedIn: () => {},
     setAccountError: (errMsg: string) => {},
+    clearAccountError: () => {},
     register: (username: string, firstName: string, lastName: string, email: string, password: string) => {},
     login: (email: string, password: string) => {},
     logout: () => {},
@@ -47,6 +48,7 @@ export const AuthContextProvider = (props: {
     children: React.ReactNode
 }) => {
     const [auth, setAuth] = useState(defaultAuthState);
+    const navigate = useNavigate();
 
     const authReducer = (action: { type: AuthActionType, payload: any }) => {
         const { type, payload } = action;
@@ -87,6 +89,16 @@ export const AuthContextProvider = (props: {
         });
     },
 
+    auth.clearAccountError = async () => {
+        authReducer({
+            type: AuthActionType.ERROR,
+            payload: {
+                error: false,
+                message: ""
+            }
+        });
+    },
+
     auth.setLoggedIn = async () => {
         const response = await getLoggedIn();
         if (!response) return auth.setAccountError("Couldn't establish connection to server?");
@@ -116,7 +128,7 @@ export const AuthContextProvider = (props: {
                     user: response.user
                 }
             });
-            redirect("/home/");
+            navigate("/home/");
         } else {
             const errMsg = response.errorMsg!;
             auth.setAccountError(errMsg);
@@ -134,7 +146,7 @@ export const AuthContextProvider = (props: {
                     user: response.user
                 }
             });
-            redirect("/home/");
+            navigate("/home/");
         } else {
             const errMsg = response.errorMsg!;
             auth.setAccountError(errMsg);
@@ -152,7 +164,7 @@ export const AuthContextProvider = (props: {
                     user: null
                 }
             });
-            redirect("/home/");
+            navigate("/home/");
         } else {
             const errMsg = response.errorMsg!;
             auth.setAccountError(errMsg);
