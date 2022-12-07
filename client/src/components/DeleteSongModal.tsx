@@ -40,11 +40,11 @@ export const DeleteSongModal = () => {
             open={store.currentModal === ModalType.DELETE_SONG}
             onClose={handleClose}>
             <DialogTitle id="alert-dialog-title">
-                Remove {store.expandedPlaylist?.songs[store.markedSongIndex]?.title}?
+                Remove Song?
             </DialogTitle>
             <DialogContent>
                 <DialogContentText id="alert-dialog-description">
-                    Are you sure you wish to permanently remove <span style={{fontWeight: "bold"}}>{store.expandedPlaylist?.songs[store.markedSongIndex]?.title}</span> from the playlist?
+                    Are you sure you wish to permanently remove "<span style={{fontWeight: "bold"}}>{store.expandedPlaylist?.songs[store.markedSongIndex]?.title}</span>"" from the playlist?
                 </DialogContentText>
             </DialogContent>
             <DialogActions>

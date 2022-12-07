@@ -6,7 +6,7 @@ import { TPS } from "../common/tps";
 // import api from './store-request-api'
 import { AuthContext } from "../auth";
 
-import { createPlaylist, deletePlaylist, getPlaylists, updatePlaylistDetails } from "./requests-api";
+import { createPlaylist, deletePlaylist, getPlaylists, updatePlaylistDetails, updatePlaylistInteractions } from "./requests-api";
 import type { Playlist } from "./requests-api";
 export type { Playlist } from "./requests-api";
 
@@ -89,6 +89,7 @@ const defaultStoreState: {
     setExpandedPlaylist?: (playlist: Playlist) => void,
     updateExpandedPlaylist?: () => void,
     updatePlaylist?: (playlist: Playlist) => Promise<{error: boolean, alreadyExists: boolean}>,
+    updatePlaylistInteractions?: (playlist: Playlist) => void,
     publishExpandedPlaylist?: () => void,
     deleteExpandedPlaylist?: () => void,
     setModal?: (modal: ModalType) => void,
@@ -566,6 +567,22 @@ export const GlobalStoreContextProvider = (props: {
 
         const alreadyExists = 'alreadyExists' in response ? (response as any).alreadyExists : false;
         return {error: response.error, alreadyExists};
+    }
+
+    store.updatePlaylistInteractions = async (playlist: Playlist) => {
+        const response = await updatePlaylistInteractions(playlist);
+        if (response && 'playlist' in response) {
+            storeReducer({
+                type: GlobalStoreActionType.UPDATE_PLAYLIST,
+                payload: response.playlist
+            });
+            storeReducer({
+                type: GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST,
+                payload: (response.playlist._id === store.expandedPlaylist?._id ? response.playlist : store.expandedPlaylist)
+            });
+        } else {
+            console.error(response);
+        }
     }
 
     store.publishExpandedPlaylist = async () => {

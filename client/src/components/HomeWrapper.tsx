@@ -48,6 +48,8 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import PersonPinIcon from '@mui/icons-material/PersonPin';
 import CloseIcon from '@mui/icons-material/Close';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 
 import IconButton from '@mui/material/IconButton';
 import { CardActionArea, Icon } from '@mui/material';
@@ -323,9 +325,46 @@ export const HomeWrapper = () => {
         }
     };
 
+    const onClickLike = (playlist: Playlist) => {
+        return (e: React.SyntheticEvent) => {
+            e.stopPropagation();
+            if (playlist.likes.includes(auth.user.username)) {
+                const index = playlist.likes.indexOf(auth.user.username);
+                playlist.likes.splice(index, 1);
+            } else {
+                if (playlist.dislikes.includes(auth.user.username)) {
+                    const index = playlist.dislikes.indexOf(auth.user.username);
+                    playlist.dislikes.splice(index, 1);
+                }
+                playlist.likes.push(auth.user.username);
+            }
+
+            store.updatePlaylistInteractions(playlist);
+        };
+    }
+
+    const onClickDislike = (playlist: Playlist) => {
+        return (e: React.SyntheticEvent) => {
+            e.stopPropagation();
+            if (playlist.dislikes.includes(auth.user.username)) {
+                const index = playlist.dislikes.indexOf(auth.user.username);
+                playlist.dislikes.splice(index, 1);
+            } else {
+                if (playlist.likes.includes(auth.user.username)) {
+                    const index = playlist.likes.indexOf(auth.user.username);
+                    playlist.likes.splice(index, 1);
+                }
+                playlist.dislikes.push(auth.user.username);
+            }
+
+            store.updatePlaylistInteractions(playlist);
+        };
+    }
+
     // console.log(playlistsSorted);
     const playlistEls = playlistsSorted.map((playlist: Playlist) => {
         const backgroundColor = isSelected(playlist) ? " #ffdd99" : (playlist.isPublished ? "#cce6ff" : "initial");
+        console.log(playlist);
         return {
             key: playlist._id,
             el: (<Card sx={{ m: 1, backgroundColor: backgroundColor }}>
@@ -334,12 +373,29 @@ export const HomeWrapper = () => {
                         <Grid container>
                             <Grid item xs={8}>
                                 {editingPlaylist?._id === playlist._id ?
-                                <TextField onKeyDown={handleEditKeyDown} onClick={playlistNameClickHandler(playlist)} value={editingPlaylistName} onChange={(e) => setEditingPlaylistName(e.target.value)} label="" variant="standard" />
-                                :<Typography variant="h5"><span onClick={playlistNameClickHandler(playlist)}>{playlist.name}</span></Typography>
+                                    <TextField onKeyDown={handleEditKeyDown} onClick={playlistNameClickHandler(playlist)} value={editingPlaylistName} onChange={(e) => setEditingPlaylistName(e.target.value)} label="" variant="standard" />
+                                    : <Typography variant="h5"><span onClick={playlistNameClickHandler(playlist)}>{playlist.name}</span></Typography>
                                 }
                                 <Typography variant="body1">By: <Link onClick={handleClickUsername(playlist.username)}>{playlist.username}</Link></Typography>
                             </Grid>
-                            <Grid item xs={4}></Grid>
+                            <Grid item xs={4}>
+                                {playlist.isPublished ?
+                                    <Grid container>
+                                        <Grid item xs={6}>
+                                            <IconButton component={Box} onClick={onClickLike(playlist)} size="large">
+                                                <ThumbUpIcon style={{color: playlist.likes.includes(auth.user.username) ? "green" : "initial"}} />
+                                            </IconButton>
+                                            <Typography display="inline" variant="body1">{playlist.likes.length}</Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <IconButton component={Box} onClick={onClickDislike(playlist)} size="large">
+                                                <ThumbDownIcon style={{color: playlist.dislikes.includes(auth.user.username) ? "red" : "initial"}} />
+                                            </IconButton>
+                                            <Typography display="inline" variant="body1">{playlist.dislikes.length}</Typography>
+                                        </Grid>
+                                    </Grid>
+                                    : <></>}
+                            </Grid>
                         </Grid>
                     </CardContent>
                 </CardActionArea>
@@ -348,10 +404,24 @@ export const HomeWrapper = () => {
                         playlistInner(playlist)
                         : <></>}
                 </CardContent>
-                <CardActions sx={{ p: 0, float: "right" }}>
-                    <IconButton onClick={handleExpand(playlist)}>
-                        {isExpanded(playlist) ? <KeyboardDoubleArrowUpIcon /> : <KeyboardDoubleArrowDownIcon />}
-                    </IconButton>
+                <CardActions sx={{ p: 0 }}>
+                    <Grid sx={{ pl: 1, pr: 1 }} container>
+                        <Grid item xs={8}>
+                            {playlist.isPublished ?
+                                <Typography display="inline" variant="body1">Published: <span style={{ color: "green" }}>{new Date(playlist.publishDate).toLocaleString()}</span></Typography>
+                                : <></>
+                            }
+                        </Grid>
+                        <Grid item xs={4}>
+                            {playlist.isPublished ?
+                                <Typography display="inline" variant="body1">Listens: <span style={{ color: "red" }}>{playlist.listens}</span></Typography>
+                                : <></>
+                            }
+                            <IconButton style={{ float: "right" }} onClick={handleExpand(playlist)}>
+                                {isExpanded(playlist) ? <KeyboardDoubleArrowUpIcon /> : <KeyboardDoubleArrowDownIcon />}
+                            </IconButton>
+                        </Grid>
+                    </Grid>
                 </CardActions>
             </Card>)
         }

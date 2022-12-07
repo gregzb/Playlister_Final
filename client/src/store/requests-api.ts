@@ -89,6 +89,20 @@ export const updatePlaylistDetails = exceptionWrapper(async (playlist: Playlist)
     return await res.json();
 });
 
+export const updatePlaylistInteractions = exceptionWrapper(async (playlist: Playlist): Promise<ErrT | SuccessT & {
+    playlist: Playlist
+}> => {
+    const res = await fetch(`${baseUrl}/playlist/interactions/${playlist._id}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(playlist)
+    });
+    return await res.json();
+});
+
 export const deletePlaylist = exceptionWrapper(async (playlist: Playlist): Promise<ErrT | SuccessT & {
     playlist: Playlist
 }> => {

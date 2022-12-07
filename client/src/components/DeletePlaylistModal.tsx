@@ -39,15 +39,23 @@ export const DeletePlaylistModal = () => {
         <Dialog
             open={store.currentModal === ModalType.DELETE_LIST}
             onClose={handleClose}>
-            <DialogTitle id="alert-dialog-title">
+            {/* <DialogTitle id="alert-dialog-title">
                 Delete the <span style={{fontWeight: "bold"}}>{store.expandedPlaylist?.name}</span> playlist?
-            </DialogTitle>
+            </DialogTitle> */}
             {/* <DialogContent>
                 <DialogContentText id="alert-dialog-description">
                     Let Google help apps determine location. This means sending anonymous
                     location data to Google, even when no apps are running.
                 </DialogContentText>
             </DialogContent> */}
+            <DialogTitle id="alert-dialog-title">
+                Delete Playlist?
+            </DialogTitle>
+            <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                    Are you sure you want to delete the "<span style={{fontWeight: "bold"}}>{store.expandedPlaylist?.name}</span>" playlist?
+                </DialogContentText>
+            </DialogContent>
             <DialogActions>
                 <Button onClick={handleDeleteList}>Confirm</Button>
                 <Button onClick={handleClose}>Cancel</Button>
