@@ -219,7 +219,7 @@ export const GlobalStoreContextProvider = (props: {
                 return setStore(prev => ({
                     ...prev,
                     selectedPlaylist: payload,
-                    playingSongIndex: -1
+                    playingSongIndex: 0
                 }));
             } case GlobalStoreActionType.CHANGE_PLAYING_SONG_INDEX: {
                 return setStore(prev => ({

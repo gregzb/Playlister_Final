@@ -92,10 +92,10 @@ export const HomeHeader = () => {
                     <Button variant={store.currentHomeView == HomeView.OWN ? "contained" : "text"} disabled={!auth.loggedIn} onClick={()=>store.setHomeView(HomeView.OWN)}>
                         <HomeIcon fontSize="large"></HomeIcon>
                     </Button>
-                    <Button variant={store.currentHomeView == HomeView.ALL ? "contained" : "text"} onClick={()=>store.setHomeView(HomeView.ALL)} color="primary">
+                    <Button variant={store.currentHomeView == HomeView.ALL ? "contained" : "text"} onClick={()=>store.setHomeView(HomeView.ALL)}>
                         <PeopleOutlineIcon fontSize="large"></PeopleOutlineIcon>
                     </Button>
-                    <Button variant={store.currentHomeView == HomeView.USER ? "contained" : "text"} onClick={()=>store.setHomeView(HomeView.USER)} color="primary">
+                    <Button variant={store.currentHomeView == HomeView.USER ? "contained" : "text"} onClick={()=>store.setHomeView(HomeView.USER)}>
                         <PersonOutlineIcon fontSize="large"></PersonOutlineIcon>
                     </Button>
                 </ButtonGroup>

@@ -12,6 +12,7 @@ import { DeletePlaylistModal } from "./DeletePlaylistModal"
 import { DeleteSongModal } from "./DeleteSongModal"
 import { EditSongModal } from "./EditSongModal"
 import { DuplicateRenameModal } from "./DuplicateRenameModal"
+import { SelectedPlaylistView } from "./SelectedPlaylistView"
 
 import type { Playlist } from "../store"
 
@@ -441,7 +442,7 @@ export const HomeWrapper = () => {
                     </Grid>
                 </Grid>
                 <Grid item xs={5}>
-                    b
+                    <SelectedPlaylistView />
                 </Grid>
             </Grid>
         </Paper>
