@@ -465,8 +465,25 @@ export const GlobalStoreContextProvider = (props: {
     }
 
     store.createPlaylist = async (name, songs) => {
-        const res = await createPlaylist(name, songs);
-        store.loadPlaylistsWrapper(HomeView.OWN);
+        const ownPlaylists = await getPlaylists("own");
+        if (ownPlaylists.error === true) {
+            console.error("error getting own playlists when making a new playlist");
+            return;
+        }
+        const includesName = (name: string) => {
+            return ownPlaylists.playlists.map((p) => p.name).includes(name);
+        }
+        if (!includesName(name)) {
+            const res = await createPlaylist(name, songs);
+            store.loadPlaylistsWrapper(HomeView.OWN);
+        } else {
+            let counter = 2;
+            while (includesName(name + " " + counter)) {
+                counter++;
+            }
+            const res = await createPlaylist(name + " " + counter, songs);
+            store.loadPlaylistsWrapper(HomeView.OWN);
+        }
     }
 
     store.setExpandedPlaylist = (playlist: Playlist) => {

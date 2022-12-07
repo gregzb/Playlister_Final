@@ -110,7 +110,7 @@ export const HomeWrapper = () => {
         return store.selectedPlaylist?._id === playlist._id;
     };
 
-    const currentlyPlayingSongIndex = 2;
+    const currentlyPlayingSongIndex = store.playingSongIndex;
 
     const playlistInner = (playlist: Playlist) => {
         if (playlist.isPublished) {
