@@ -87,6 +87,16 @@ export const updatePlaylistDetails = exceptionWrapper(async (playlist: Playlist)
     return await res.json();
 });
 
+export const deletePlaylist = exceptionWrapper(async (playlist: Playlist): Promise<ErrT | SuccessT & {
+    playlist: Playlist
+}> => {
+    const res = await fetch(`${baseUrl}/playlist/${playlist._id}`, {
+        method: "DELETE",
+        credentials: "include",
+    });
+    return await res.json();
+});
+
 export const getPlaylists = exceptionWrapper(async (whose: "own" | "all" | "user", username: string | undefined): Promise<ErrT | SuccessT & {
     playlists: Playlist[]
 }> => {

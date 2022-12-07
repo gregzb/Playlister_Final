@@ -4,10 +4,13 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from '../auth'
-import { GlobalStoreContext, HomeView } from '../store'
+import { GlobalStoreContext, HomeView, ModalType } from '../store'
 
 import { StatusBar } from "./StatusBar"
 import { HomeHeader } from "./HomeHeader"
+import { DeletePlaylistModal } from "./DeletePlaylistModal"
+import { DeleteSongModal } from "./DeleteSongModal"
+import { EditSongModal } from "./EditSongModal"
 
 import type { Playlist } from "../store"
 
@@ -99,21 +102,62 @@ export const HomeWrapper = () => {
         return store.expandedPlaylist?._id === playlist._id;
     };
 
+    const currentlyPlayingSongIndex = 2;
+
     const playlistInner = (playlist: Playlist) => {
         if (playlist.isPublished) {
-            return (<></>)
+            return (<>
+                <Grid container>
+                    <div style={{maxHeight: "20em", overflowY: "scroll", width: "100%"}}>
+                    {playlist.songs.map((song, idx) => {
+                        return (
+                        <Grid key={""+idx+"|"+song.title+"|"+song.artist+"|"+song.youTubeId} item xs={12}>
+                            {/* <Card sx={{ m: 1 }}> */}
+                                <Typography style={{fontWeight: "bold", color: currentlyPlayingSongIndex === idx ? "#96471a" : "#968e1a"}} display="inline" variant="body1">{idx + 1}. {song.title} by {song.artist}</Typography>
+                            {/* </Card> */}
+                        </Grid>
+                        )
+                    })}
+                    </div>
+
+                    <Grid item xs={12}>
+                        <ButtonGroup sx={{float: "right"}} variant="contained">
+                            <Button sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Delete</Button>
+                            <Button onClick={() => store.createPlaylist(`Copy of ${playlist.name}`, [...playlist.songs])} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Duplicate</Button>
+                        </ButtonGroup>
+                    </Grid>
+                </Grid>
+                </>)
         } else {
+
+            const editSongClicked = (index: number) => {
+                return (e: React.SyntheticEvent) => {
+                    e.stopPropagation();
+                    store.setMarkedSongIndex(index);
+                    store.setModal(ModalType.EDIT_SONG);
+                    console.log("edit!");
+                }
+            };
+
+            const deleteSongClicked = (index: number) => {
+                return (e: React.SyntheticEvent) => {
+                    e.stopPropagation();
+                    store.setMarkedSongIndex(index);
+                    store.setModal(ModalType.DELETE_SONG);
+                }
+            };
+
             return (
                 <>
                 <Grid container>
                     <div style={{maxHeight: "20em", overflowY: "scroll", width: "100%"}}>
                     {playlist.songs.map((song, idx) => {
                         return (
-                        <Grid item xs={12}>
-                            <Card sx={{ m: 1 }}>
+                        <Grid key={""+idx+"|"+song.title+"|"+song.artist+"|"+song.youTubeId} item xs={12}>
+                            <Card onDoubleClick={editSongClicked(idx)} sx={{ m: 1 }}>
                                 {/* <CardActionArea> */}
                                     <Typography display="inline" variant="h5">{idx + 1}. {song.title} by {song.artist}</Typography>
-                                    <IconButton style={{float: "right"}}>
+                                    <IconButton onClick={deleteSongClicked(idx)} style={{float: "right"}}>
                                         <CloseIcon></CloseIcon>
                                     </IconButton>
                                 {/* </CardActionArea> */}
@@ -140,7 +184,7 @@ export const HomeWrapper = () => {
 
                         <ButtonGroup sx={{float: "right"}} variant="contained">
                             <Button onClick={() => store.publishExpandedPlaylist()} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Publish</Button>
-                            <Button sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Delete</Button>
+                            <Button onClick={() => store.setModal(ModalType.DELETE_LIST)} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Delete</Button>
                             <Button onClick={() => store.createPlaylist(`Copy of ${playlist.name}`, [...playlist.songs])} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Duplicate</Button>
                         </ButtonGroup>
                     </Grid>
@@ -196,5 +240,8 @@ export const HomeWrapper = () => {
             </Grid>
         </Paper>
         <StatusBar style={{ margin: 5, padding: 5 }}></StatusBar>
+        <DeletePlaylistModal/>
+        <DeleteSongModal/>
+        <EditSongModal/>
     </Card>);
 }

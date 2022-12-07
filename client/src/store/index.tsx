@@ -6,7 +6,7 @@ import { TPS } from "../common/tps";
 // import api from './store-request-api'
 import { AuthContext } from "../auth";
 
-import { createPlaylist, getPlaylists, updatePlaylistDetails } from "./requests-api";
+import { createPlaylist, deletePlaylist, getPlaylists, updatePlaylistDetails } from "./requests-api";
 import type { Playlist } from "./requests-api";
 export type { Playlist } from "./requests-api";
 
@@ -23,6 +23,8 @@ export enum GlobalStoreActionType {
     CHANGE_LOADED_PLAYLISTS,
     CHANGE_EXPANDED_PLAYLIST,
     UPDATE_PLAYLIST,
+    CHANGE_MODAL,
+    CHANGE_MARKED_SONG_INDEX
 };
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -64,6 +66,7 @@ const defaultStoreState: {
     publishedSortDirection: PublishedSortDirection,
     loadedPlaylists: Playlist[],
     expandedPlaylist: Playlist | null,
+    markedSongIndex: number,
 
     setHomeView?: (newView: HomeView) => void,
     setUnpublishedSortDirection?: (_: UnpublishedSortDirection) => void,
@@ -80,7 +83,10 @@ const defaultStoreState: {
     }[]) => void,
     setExpandedPlaylist?: (playlist: Playlist) => void,
     updateExpandedPlaylist?: () => void,
-    publishExpandedPlaylist?: () => void
+    publishExpandedPlaylist?: () => void,
+    deleteExpandedPlaylist?: () => void,
+    setModal?: (modal: ModalType) => void,
+    setMarkedSongIndex?: (index: number) => void,
 
     clearAllTransactions?: () => void,
     addCreateSongTransaction?: (index: number, title: string, artist: string, youTubeId: string) => void,
@@ -105,6 +111,7 @@ const defaultStoreState: {
     publishedSortDirection: PublishedSortDirection.NAME,
     loadedPlaylists: [],
     expandedPlaylist: null,
+    markedSongIndex: -1,
 };
 
 export const GlobalStoreContext = createContext(defaultStoreState);
@@ -158,17 +165,28 @@ export const GlobalStoreContextProvider = (props: {
             } case GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST: {
                 return setStore(prev => ({
                     ...prev,
-                    expandedPlaylist: payload
+                    expandedPlaylist: payload,
+                    markedSongIndex: -1
                 }));
             } case GlobalStoreActionType.UPDATE_PLAYLIST: {
                 return setStore(prev => {
                     const idx = prev.loadedPlaylists.findIndex((playlist) => playlist._id === payload._id);
-                    const updatedPlaylists = [...prev.loadedPlaylists.slice(0, idx), payload, ...prev.loadedPlaylists.slice(idx+1)];
+                    const updatedPlaylists = [...prev.loadedPlaylists.slice(0, idx), payload, ...prev.loadedPlaylists.slice(idx + 1)];
                     return {
                         ...prev,
                         loadedPlaylists: updatedPlaylists
-                }
+                    }
                 })
+            } case GlobalStoreActionType.CHANGE_MODAL: {
+                return setStore(prev => ({
+                    ...prev,
+                    currentModal: payload
+                }));
+            } case GlobalStoreActionType.CHANGE_MARKED_SONG_INDEX: {
+                return setStore(prev => ({
+                    ...prev,
+                    markedSongIndex: payload
+                }));
             }
             // // LIST UPDATE OF ITS NAME
             // case GlobalStoreActionType.CHANGE_LIST_NAME: {
@@ -345,6 +363,7 @@ export const GlobalStoreContextProvider = (props: {
         //     store.loadUserPlaylists("");
         // }
         store.loadPlaylistsWrapper(newView);
+        store.setExpandedPlaylist(null);
         storeReducer({ type: GlobalStoreActionType.CHANGE_HOME_VIEW, payload: newView });
         // setTimeout(() => {
         //     store.loadPlaylistsWrapper();
@@ -472,6 +491,29 @@ export const GlobalStoreContextProvider = (props: {
         } else {
             console.error("uh oh");
         }
+    }
+
+    store.deleteExpandedPlaylist = async () => {
+        const res = await deletePlaylist(store.expandedPlaylist);
+        if (res.error === true) {
+            console.error("failed to delete playlist: " + res.errorMsg);
+        }
+        storeReducer({ type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: store.loadedPlaylists.filter((playlist) => playlist._id !== store.expandedPlaylist._id) });
+        storeReducer({ type: GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST, payload: null });
+    }
+
+    store.setModal = (modal: ModalType) => {
+        storeReducer({
+            type: GlobalStoreActionType.CHANGE_MODAL,
+            payload: modal
+        })
+    }
+
+    store.setMarkedSongIndex = (index: number) => {
+        storeReducer({
+            type: GlobalStoreActionType.CHANGE_MARKED_SONG_INDEX,
+            payload: index
+        });
     }
 
     store.createSong = (index: number, song: { title: string, artist: string, youTubeId: string }) => {
