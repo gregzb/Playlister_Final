@@ -83,7 +83,11 @@ export const HomeWrapper = () => {
     const handleClickUsername = (username: string) => {
         return (e: React.SyntheticEvent) => {
             e.preventDefault();
-            console.log("username clicked:", username);
+            e.stopPropagation();
+            store.setHomeView(HomeView.USER);
+            store.setSearchText(username);
+            store.loadUserPlaylists(username);
+            // console.log("username clicked:", username);
         }
     }
 

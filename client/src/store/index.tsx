@@ -153,10 +153,26 @@ export const GlobalStoreContextProvider = (props: {
                     unpublishedSortDirection: payload
                 }));
             } case GlobalStoreActionType.CHANGE_SEARCH_TEXT: {
-                return setStore(prev => ({
-                    ...prev,
-                    searchText: payload
-                }));
+                return setStore(prev => {
+                    let nextLoadedPlaylists = prev.loadedPlaylists;
+                    if (prev.currentHomeView === HomeView.USER) {
+                        store.loadUserPlaylists(payload);
+                    } else if (prev.currentHomeView === HomeView.ALL) {
+                        if (payload === "") {
+                            // console.log("empty");
+                            nextLoadedPlaylists = [];
+                            // storeReducer({ type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: [] });
+                        } else if ((!store.searchText || store.searchText === "") && payload !== "") {
+                            store.loadAllPlaylists();
+                        }
+                    }
+                    return {
+                        ...prev,
+                        searchText: payload,
+                        expandedPlaylist: null,
+                        loadedPlaylists: nextLoadedPlaylists
+                    }
+                });
             } case GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS: {
                 return setStore(prev => ({
                     ...prev,
@@ -380,16 +396,16 @@ export const GlobalStoreContextProvider = (props: {
     }
 
     store.setSearchText = (newSearchText: string) => {
-        store.setExpandedPlaylist(null);
-        if (store.currentHomeView === HomeView.USER) {
-            store.loadUserPlaylists(newSearchText);
-        } else if (store.currentHomeView === HomeView.ALL) {
-            if (newSearchText === "") {
-                storeReducer({ type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: [] });
-            } else if ((!store.searchText || store.searchText === "") && newSearchText !== "") {
-                store.loadAllPlaylists();
-            }
-        }
+        // store.setExpandedPlaylist(null);
+        // if (store.currentHomeView === HomeView.USER) {
+        //     store.loadUserPlaylists(newSearchText);
+        // } else if (store.currentHomeView === HomeView.ALL) {
+        //     if (newSearchText === "") {
+        //         storeReducer({ type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: [] });
+        //     } else if ((!store.searchText || store.searchText === "") && newSearchText !== "") {
+        //         store.loadAllPlaylists();
+        //     }
+        // }
         storeReducer({ type: GlobalStoreActionType.CHANGE_SEARCH_TEXT, payload: newSearchText });
     }
 
