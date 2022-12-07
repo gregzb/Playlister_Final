@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AuthContext } from '../auth'
-import { GlobalStoreContext, HomeView, ModalType } from '../store'
+import { GlobalStoreContext, HomeView, ModalType, PublishedSortDirection, UnpublishedSortDirection } from '../store'
 
 import { StatusBar } from "./StatusBar"
 import { HomeHeader } from "./HomeHeader"
@@ -64,7 +64,7 @@ export const HomeWrapper = () => {
     console.log(store);
 
     useEffect(() => {
-        if (auth.loggedIn === false && store.currentHomeView == HomeView.OWN) {
+        if (auth.loggedIn === false && store.currentHomeView === HomeView.OWN) {
             store.setHomeView(HomeView.ALL);
         }
     }, [auth.loggedIn]);
@@ -108,26 +108,26 @@ export const HomeWrapper = () => {
         if (playlist.isPublished) {
             return (<>
                 <Grid container>
-                    <div style={{maxHeight: "20em", overflowY: "scroll", width: "100%"}}>
-                    {playlist.songs.map((song, idx) => {
-                        return (
-                        <Grid key={""+idx+"|"+song.title+"|"+song.artist+"|"+song.youTubeId} item xs={12}>
-                            {/* <Card sx={{ m: 1 }}> */}
-                                <Typography style={{fontWeight: "bold", color: currentlyPlayingSongIndex === idx ? "#96471a" : "#968e1a"}} display="inline" variant="body1">{idx + 1}. {song.title} by {song.artist}</Typography>
-                            {/* </Card> */}
-                        </Grid>
-                        )
-                    })}
+                    <div style={{ maxHeight: "20em", overflowY: "scroll", width: "100%" }}>
+                        {playlist.songs.map((song, idx) => {
+                            return (
+                                <Grid key={"" + idx + "|" + song.title + "|" + song.artist + "|" + song.youTubeId} item xs={12}>
+                                    {/* <Card sx={{ m: 1 }}> */}
+                                    <Typography style={{ fontWeight: "bold", color: currentlyPlayingSongIndex === idx ? "#96471a" : "#968e1a" }} display="inline" variant="body1">{idx + 1}. {song.title} by {song.artist}</Typography>
+                                    {/* </Card> */}
+                                </Grid>
+                            )
+                        })}
                     </div>
 
                     <Grid item xs={12}>
-                        <ButtonGroup sx={{float: "right"}} variant="contained">
-                            <Button sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Delete</Button>
-                            <Button onClick={() => store.createPlaylist(`Copy of ${playlist.name}`, [...playlist.songs])} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Duplicate</Button>
+                        <ButtonGroup sx={{ float: "right" }} variant="contained">
+                            <Button sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Delete</Button>
+                            <Button onClick={() => store.createPlaylist(`Copy of ${playlist.name}`, [...playlist.songs])} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Duplicate</Button>
                         </ButtonGroup>
                     </Grid>
                 </Grid>
-                </>)
+            </>)
         } else {
 
             const editSongClicked = (index: number) => {
@@ -147,54 +147,139 @@ export const HomeWrapper = () => {
                 }
             };
 
+            const handleDragStart = (index: number) => {
+                return (event: React.DragEvent) => {
+                    event.dataTransfer.setData("song", index);
+                }
+            }
+
+            const handleDragOver = (event: React.SyntheticEvent) => {
+                event.preventDefault();
+            }
+
+            const handleDragEnter = (event: React.SyntheticEvent) => {
+                event.preventDefault();
+            }
+
+            const handleDragLeave = (event: React.SyntheticEvent) => {
+                event.preventDefault();
+            }
+
+            const handleDrop = (index: number) => {
+                return (event: React.DragEvent) => {
+                    event.preventDefault();
+                    let targetIndex = index;
+                    let sourceIndex = Number(event.dataTransfer.getData("song"));
+
+                    // UPDATE THE LIST
+                    store.addMoveSongTransaction(sourceIndex, targetIndex);
+                }
+            }
+
             return (
                 <>
-                <Grid container>
-                    <div style={{maxHeight: "20em", overflowY: "scroll", width: "100%"}}>
-                    {playlist.songs.map((song, idx) => {
-                        return (
-                        <Grid key={""+idx+"|"+song.title+"|"+song.artist+"|"+song.youTubeId} item xs={12}>
-                            <Card onDoubleClick={editSongClicked(idx)} sx={{ m: 1 }}>
-                                {/* <CardActionArea> */}
-                                    <Typography display="inline" variant="h5">{idx + 1}. {song.title} by {song.artist}</Typography>
-                                    <IconButton onClick={deleteSongClicked(idx)} style={{float: "right"}}>
-                                        <CloseIcon></CloseIcon>
-                                    </IconButton>
-                                {/* </CardActionArea> */}
-                            </Card>
+                    <Grid container>
+                        <div style={{ maxHeight: "20em", overflowY: "scroll", width: "100%" }}>
+                            {playlist.songs.map((song, idx) => {
+                                return (
+                                    <Grid key={"" + idx + "|" + song.title + "|" + song.artist + "|" + song.youTubeId}
+                                        item
+                                        xs={12}
+                                        onDragStart={handleDragStart(idx)}
+                                        onDragOver={handleDragOver}
+                                        onDragEnter={handleDragEnter}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={handleDrop(idx)}
+                                        draggable="true"
+                                    >
+                                        <Card onDoubleClick={editSongClicked(idx)} sx={{ m: 1 }}>
+                                            {/* <CardActionArea> */}
+                                            <Typography display="inline" variant="h5">{idx + 1}. {song.title} by {song.artist}</Typography>
+                                            <IconButton onClick={deleteSongClicked(idx)} style={{ float: "right" }}>
+                                                <CloseIcon></CloseIcon>
+                                            </IconButton>
+                                            {/* </CardActionArea> */}
+                                        </Card>
+                                    </Grid>
+                                )
+                            })}
+                            <Grid item xs={12}>
+                                <Card sx={{ m: 1 }}>
+                                    <CardActionArea onClick={() => {
+                                        store.addCreateSongTransaction(playlist.songs.length, "Untitled", "Unknown", "dQw4w9WgXcQ")
+                                    }}>
+                                        <Typography align="center" variant="h3">+</Typography>
+                                    </CardActionArea>
+                                </Card>
+                            </Grid>
+                        </div>
+
+                        <Grid item xs={12}>
+                            <ButtonGroup variant="contained">
+                                <Button onClick={store.undo} disabled={!store.canUndo()} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Undo</Button>
+                                <Button onClick={store.redo} disabled={!store.canRedo()} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Redo</Button>
+                            </ButtonGroup>
+
+                            <ButtonGroup sx={{ float: "right" }} variant="contained">
+                                <Button onClick={() => store.publishExpandedPlaylist()} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Publish</Button>
+                                <Button onClick={() => store.setModal(ModalType.DELETE_LIST)} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Delete</Button>
+                                <Button onClick={() => store.createPlaylist(`Copy of ${playlist.name}`, [...playlist.songs])} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Duplicate</Button>
+                            </ButtonGroup>
                         </Grid>
-                        )
-                    })}
-                    <Grid item xs={12}>
-                        <Card sx={{ m: 1 }}>
-                            <CardActionArea onClick={() => {
-                                store.addCreateSongTransaction(playlist.songs.length, "Untitled", "Unknown", "dQw4w9WgXcQ")
-                            }}>
-                                <Typography align="center" variant="h3">+</Typography>
-                            </CardActionArea>
-                        </Card>
                     </Grid>
-                    </div>
-
-                    <Grid item xs={12}>
-                        <ButtonGroup variant="contained">
-                            <Button onClick={store.undo} disabled={!store.canUndo()} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Undo</Button>
-                            <Button onClick={store.redo} disabled={!store.canRedo()} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Redo</Button>
-                        </ButtonGroup>
-
-                        <ButtonGroup sx={{float: "right"}} variant="contained">
-                            <Button onClick={() => store.publishExpandedPlaylist()} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Publish</Button>
-                            <Button onClick={() => store.setModal(ModalType.DELETE_LIST)} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Delete</Button>
-                            <Button onClick={() => store.createPlaylist(`Copy of ${playlist.name}`, [...playlist.songs])} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Duplicate</Button>
-                        </ButtonGroup>
-                    </Grid>
-                </Grid>
                 </>);
         }
     }
 
-    const playlists = store.loadedPlaylists;
-    const playlistEls = playlists.map((playlist: Playlist) => {
+    const playlistsUnsorted = store.loadedPlaylists;
+    const playlistsSorted = [...playlistsUnsorted];
+    console.log(playlistsUnsorted[0]);
+    playlistsSorted.sort((a, b) => {
+        if (store.currentHomeView === HomeView.OWN) {
+            if (store.unpublishedSortDirection === UnpublishedSortDirection.NAME) {
+                return a.name.localeCompare(b.name);
+            } else if (store.unpublishedSortDirection === UnpublishedSortDirection.CREATION_DATE) {
+                const da = new Date(a.createdAt);
+                const db = new Date(b.createdAt);
+
+                if (da < db) return -1;
+                if (da > db) return 1;
+                return 0;
+            } else {
+                const da = new Date(a.lastEditedDate);
+                const db = new Date(b.lastEditedDate);
+
+                if (da > db) return -1;
+                if (da < db) return 1;
+                return 0;
+            }
+        } else {
+            if (store.publishedSortDirection === PublishedSortDirection.NAME) {
+                return a.name.localeCompare(b.name);
+            } else if (store.publishedSortDirection === PublishedSortDirection.PUBLISH_DATE) {
+                const da = new Date(a.publishDate);
+                const db = new Date(b.publishDate);
+
+                if (da > db) return -1;
+                if (da < db) return 1;
+                return 0;
+            } else if (store.publishedSortDirection === PublishedSortDirection.LISTENS) {
+                if (a.listens > b.listens) return -1;
+                if (a.listens < b.listens) return 1;
+                return 0;
+            } else if (store.publishedSortDirection === PublishedSortDirection.LIKES) {
+                if (a.likes > b.likes) return -1;
+                if (a.likes < b.likes) return 1;
+                return 0;
+            } else if (store.publishedSortDirection === PublishedSortDirection.DISLIKES) {
+                if (a.dislikes > b.dislikes) return -1;
+                if (a.dislikes < b.dislikes) return 1;
+                return 0;
+            } 
+        }
+    });
+    console.log(playlistsSorted);
+    const playlistEls = playlistsSorted.map((playlist: Playlist) => {
         return {
             key: playlist._id,
             el: (<Card sx={{ m: 1 }}>
@@ -242,8 +327,8 @@ export const HomeWrapper = () => {
             </Grid>
         </Paper>
         <StatusBar style={{ margin: 5, padding: 5 }}></StatusBar>
-        <DeletePlaylistModal/>
-        <DeleteSongModal/>
-        <EditSongModal key={(currSong?.title??"")+"|"+(currSong?.artist??"")+"|"+(currSong?.youTubeId??"")}/>
+        <DeletePlaylistModal />
+        <DeleteSongModal />
+        <EditSongModal key={(currSong?.title ?? "") + "|" + (currSong?.artist ?? "") + "|" + (currSong?.youTubeId ?? "")} />
     </Card>);
 }

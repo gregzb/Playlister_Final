@@ -64,7 +64,7 @@ export const HomeHeader = () => {
         }
     };
 
-    const viewingPublished = store.currentHomeView != HomeView.OWN;
+    const viewingPublished = store.currentHomeView === HomeView.OWN;
     const menuSortItems = viewingPublished ? [
         <MenuItem key="name" onClick={handleCloseSortMenuUnpublished(UnpublishedSortDirection.NAME)}>Name (A-Z)</MenuItem>,
         <MenuItem key="creationDate" onClick={handleCloseSortMenuUnpublished(UnpublishedSortDirection.CREATION_DATE)}>Creation Date (Old-New)</MenuItem>,

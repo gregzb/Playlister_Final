@@ -1,4 +1,4 @@
-const baseUrl = "http://localhost:4000/api/";
+const baseUrl = "http://localhost:4000/api";
 
 // export type User = {
 //     firstName: string;
@@ -18,8 +18,10 @@ export type Playlist = {
         youTubeId: string
     }[];
     isPublished: boolean;
-    publishDate: Date;
-    lastEditedDate: Date;
+    publishDate: string;
+    lastEditedDate: string;
+    createdAt: string;
+    updatedAt: string;
 
     likes: [string];
     dislikes: [string];
@@ -100,7 +102,7 @@ export const deletePlaylist = exceptionWrapper(async (playlist: Playlist): Promi
 export const getPlaylists = exceptionWrapper(async (whose: "own" | "all" | "user", username: string | undefined): Promise<ErrT | SuccessT & {
     playlists: Playlist[]
 }> => {
-    const res = await fetch(`${baseUrl}/playlists/${whose}/${username ? `username=${username}` : ""}`, {
+    const res = await fetch(`${baseUrl}/playlists/${whose}/?${username ? `username=${username}` : ""}`, {
         method: "GET",
         credentials: "include",
     });

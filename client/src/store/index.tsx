@@ -380,6 +380,16 @@ export const GlobalStoreContextProvider = (props: {
     }
 
     store.setSearchText = (newSearchText: string) => {
+        store.setExpandedPlaylist(null);
+        if (store.currentHomeView === HomeView.USER) {
+            store.loadUserPlaylists(newSearchText);
+        } else if (store.currentHomeView === HomeView.ALL) {
+            if (newSearchText === "") {
+                storeReducer({ type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: [] });
+            } else if ((!store.searchText || store.searchText === "") && newSearchText !== "") {
+                store.loadAllPlaylists();
+            }
+        }
         storeReducer({ type: GlobalStoreActionType.CHANGE_SEARCH_TEXT, payload: newSearchText });
     }
 
