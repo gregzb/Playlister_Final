@@ -43,6 +43,7 @@ import SortIcon from '@mui/icons-material/Sort';
 import PhoneIcon from '@mui/icons-material/Phone';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import PersonPinIcon from '@mui/icons-material/PersonPin';
+import CloseIcon from '@mui/icons-material/Close';
 
 import IconButton from '@mui/material/IconButton';
 import { CardActionArea, Icon } from '@mui/material';
@@ -105,13 +106,17 @@ export const HomeWrapper = () => {
             return (
                 <>
                 <Grid container>
+                    <div style={{maxHeight: "20em", overflowY: "scroll", width: "100%"}}>
                     {playlist.songs.map((song, idx) => {
                         return (
                         <Grid item xs={12}>
                             <Card sx={{ m: 1 }}>
-                                <CardActionArea>
-                                    <Typography variant="h4">{idx + 1}. {song.title} by {song.artist}</Typography>
-                                </CardActionArea>
+                                {/* <CardActionArea> */}
+                                    <Typography display="inline" variant="h5">{idx + 1}. {song.title} by {song.artist}</Typography>
+                                    <IconButton style={{float: "right"}}>
+                                        <CloseIcon></CloseIcon>
+                                    </IconButton>
+                                {/* </CardActionArea> */}
                             </Card>
                         </Grid>
                         )
@@ -121,21 +126,22 @@ export const HomeWrapper = () => {
                             <CardActionArea onClick={() => {
                                 store.addCreateSongTransaction(playlist.songs.length, "Untitled", "Unknown", "dQw4w9WgXcQ")
                             }}>
-                                <Typography align="center" variant="h4">+</Typography>
+                                <Typography align="center" variant="h3">+</Typography>
                             </CardActionArea>
                         </Card>
                     </Grid>
+                    </div>
 
                     <Grid item xs={12}>
                         <ButtonGroup variant="contained">
-                            <Button sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Undo</Button>
-                            <Button sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Redo</Button>
+                            <Button onClick={store.undo} disabled={!store.canUndo()} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Undo</Button>
+                            <Button onClick={store.redo} disabled={!store.canRedo()} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Redo</Button>
                         </ButtonGroup>
 
                         <ButtonGroup sx={{float: "right"}} variant="contained">
-                            <Button sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Publish</Button>
+                            <Button onClick={() => store.publishExpandedPlaylist()} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Publish</Button>
                             <Button sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Delete</Button>
-                            <Button sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Duplicate</Button>
+                            <Button onClick={() => store.createPlaylist(`Copy of ${playlist.name}`, [...playlist.songs])} sx={{pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5}}>Duplicate</Button>
                         </ButtonGroup>
                     </Grid>
                 </Grid>

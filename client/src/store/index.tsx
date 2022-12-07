@@ -6,9 +6,14 @@ import { TPS } from "../common/tps";
 // import api from './store-request-api'
 import { AuthContext } from "../auth";
 
-import {createPlaylist, getPlaylists} from "./requests-api";
-import type {Playlist} from "./requests-api";
-export type {Playlist} from "./requests-api";
+import { createPlaylist, getPlaylists, updatePlaylistDetails } from "./requests-api";
+import type { Playlist } from "./requests-api";
+export type { Playlist } from "./requests-api";
+
+import { CreateSong_Transaction } from "../transactions/CreateSong_Transaction";
+import { MoveSong_Transaction } from "../transactions/MoveSong_Transaction";
+import { RemoveSong_Transaction } from "../transactions/RemoveSong_Transaction";
+import { UpdateSong_Transaction } from "../transactions/UpdateSong_Transaction";
 
 export enum GlobalStoreActionType {
     CHANGE_HOME_VIEW,
@@ -17,6 +22,7 @@ export enum GlobalStoreActionType {
     CHANGE_SEARCH_TEXT,
     CHANGE_LOADED_PLAYLISTS,
     CHANGE_EXPANDED_PLAYLIST,
+    UPDATE_PLAYLIST,
 };
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -59,20 +65,38 @@ const defaultStoreState: {
     loadedPlaylists: Playlist[],
     expandedPlaylist: Playlist | null,
 
-    setHomeView: (newView: HomeView) => void,
-    setUnpublishedSortDirection: (_: UnpublishedSortDirection) => void,
-    setPublishedSortDirection: (_: PublishedSortDirection) => void,
-    setSearchText: (_: string) => void
-    loadOwnPlaylists: () => void
-    loadAllPlaylists: () => void
-    loadUserPlaylists: (_: string) => void
-    loadPlaylistsWrapper: (newView: HomeView) => void,
-    createPlaylist: (name: string, songs: {
+    setHomeView?: (newView: HomeView) => void,
+    setUnpublishedSortDirection?: (_: UnpublishedSortDirection) => void,
+    setPublishedSortDirection?: (_: PublishedSortDirection) => void,
+    setSearchText?: (_: string) => void,
+    loadOwnPlaylists?: () => void,
+    loadAllPlaylists?: () => void,
+    loadUserPlaylists?: (_: string) => void
+    loadPlaylistsWrapper?: (newView: HomeView) => void,
+    createPlaylist?: (name: string, songs: {
         title: string,
         artist: string,
         youTubeId: string
     }[]) => void,
-    setExpandedPlaylist: (playlist: Playlist) => void,
+    setExpandedPlaylist?: (playlist: Playlist) => void,
+    updateExpandedPlaylist?: () => void,
+    publishExpandedPlaylist?: () => void
+
+    clearAllTransactions?: () => void,
+    addCreateSongTransaction?: (index: number, title: string, artist: string, youTubeId: string) => void,
+    addMoveSongTransaction?: (start: number, end: number) => void,
+    addRemoveSongTransaction?: (index: number) => void,
+    addUpdateSongTransaction?: (index: number, title: string, artist: string, youTubeId: string) => void,
+
+    createSong?: (index: number, song: { title: string, artist: string, youTubeId: string }) => void,
+    removeSong?: (index: number) => void,
+    moveSong?: (oldIndex: number, newIndex: number) => void,
+    updateSong?: (index: number, song: { title: string, artist: string, youTubeId: string }) => void,
+
+    undo?: () => void,
+    redo?: () => void,
+    canUndo?: () => boolean,
+    canRedo?: () => boolean,
 } = {
     currentModal: ModalType.NONE,
     currentHomeView: HomeView.NONE,
@@ -81,17 +105,6 @@ const defaultStoreState: {
     publishedSortDirection: PublishedSortDirection.NAME,
     loadedPlaylists: [],
     expandedPlaylist: null,
-
-    setHomeView: (_: HomeView) => {},
-    setUnpublishedSortDirection: (_: UnpublishedSortDirection) => {},
-    setPublishedSortDirection: (_: PublishedSortDirection) => {},
-    setSearchText: (_: string) => {},
-    loadOwnPlaylists: () => {},
-    loadAllPlaylists: () => {},
-    loadUserPlaylists: (_: string) => {},
-    loadPlaylistsWrapper: (newView: HomeView) => {},
-    createPlaylist: () => {},
-    setExpandedPlaylist: (playlist: Playlist) => {}
 };
 
 export const GlobalStoreContext = createContext(defaultStoreState);
@@ -127,26 +140,35 @@ export const GlobalStoreContextProvider = (props: {
                     ...prev,
                     publishedSortDirection: payload
                 }));
-            }case GlobalStoreActionType.CHANGE_UNPUBLISHED_SORT_DIRECTION: {
+            } case GlobalStoreActionType.CHANGE_UNPUBLISHED_SORT_DIRECTION: {
                 return setStore(prev => ({
                     ...prev,
                     unpublishedSortDirection: payload
                 }));
-            }case GlobalStoreActionType.CHANGE_SEARCH_TEXT: {
+            } case GlobalStoreActionType.CHANGE_SEARCH_TEXT: {
                 return setStore(prev => ({
                     ...prev,
                     searchText: payload
                 }));
-            }case GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS: {
+            } case GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS: {
                 return setStore(prev => ({
                     ...prev,
                     loadedPlaylists: payload
                 }));
-            }case GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST: {
+            } case GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST: {
                 return setStore(prev => ({
                     ...prev,
                     expandedPlaylist: payload
-                })); 
+                }));
+            } case GlobalStoreActionType.UPDATE_PLAYLIST: {
+                return setStore(prev => {
+                    const idx = prev.loadedPlaylists.findIndex((playlist) => playlist._id === payload._id);
+                    const updatedPlaylists = [...prev.loadedPlaylists.slice(0, idx), payload, ...prev.loadedPlaylists.slice(idx+1)];
+                    return {
+                        ...prev,
+                        loadedPlaylists: updatedPlaylists
+                }
+                })
             }
             // // LIST UPDATE OF ITS NAME
             // case GlobalStoreActionType.CHANGE_LIST_NAME: {
@@ -323,7 +345,7 @@ export const GlobalStoreContextProvider = (props: {
         //     store.loadUserPlaylists("");
         // }
         store.loadPlaylistsWrapper(newView);
-        storeReducer({type: GlobalStoreActionType.CHANGE_HOME_VIEW, payload: newView});
+        storeReducer({ type: GlobalStoreActionType.CHANGE_HOME_VIEW, payload: newView });
         // setTimeout(() => {
         //     store.loadPlaylistsWrapper();
         // }, 1000);
@@ -331,15 +353,15 @@ export const GlobalStoreContextProvider = (props: {
     }
 
     store.setUnpublishedSortDirection = (newSortDirection: UnpublishedSortDirection) => {
-        storeReducer({type: GlobalStoreActionType.CHANGE_UNPUBLISHED_SORT_DIRECTION, payload: newSortDirection});
+        storeReducer({ type: GlobalStoreActionType.CHANGE_UNPUBLISHED_SORT_DIRECTION, payload: newSortDirection });
     }
 
     store.setPublishedSortDirection = (newSortDirection: PublishedSortDirection) => {
-        storeReducer({type: GlobalStoreActionType.CHANGE_PUBLISHED_SORT_DIRECTION, payload: newSortDirection});
+        storeReducer({ type: GlobalStoreActionType.CHANGE_PUBLISHED_SORT_DIRECTION, payload: newSortDirection });
     }
 
     store.setSearchText = (newSearchText: string) => {
-        storeReducer({type: GlobalStoreActionType.CHANGE_SEARCH_TEXT, payload: newSearchText});
+        storeReducer({ type: GlobalStoreActionType.CHANGE_SEARCH_TEXT, payload: newSearchText });
     }
 
     store.loadOwnPlaylists = async () => {
@@ -348,7 +370,7 @@ export const GlobalStoreContextProvider = (props: {
             console.error("Couldn't get own playlists");
             return;
         }
-        storeReducer({type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: res.playlists});
+        storeReducer({ type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: res.playlists });
     }
 
     store.loadAllPlaylists = async () => {
@@ -357,7 +379,7 @@ export const GlobalStoreContextProvider = (props: {
             console.error("Couldn't get all playlists");
             return;
         }
-        storeReducer({type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: res.playlists});
+        storeReducer({ type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: res.playlists });
     }
 
     store.loadUserPlaylists = async (username: string) => {
@@ -366,7 +388,7 @@ export const GlobalStoreContextProvider = (props: {
             console.error("Couldn't get user playlists");
             return;
         }
-        storeReducer({type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: res.playlists});
+        storeReducer({ type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: res.playlists });
     }
 
     store.createPlaylist = async (name, songs) => {
@@ -375,7 +397,134 @@ export const GlobalStoreContextProvider = (props: {
     }
 
     store.setExpandedPlaylist = (playlist: Playlist) => {
-        storeReducer({type: GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST, payload: playlist});
+        storeReducer({ type: GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST, payload: playlist });
+        store.clearAllTransactions();
+    }
+
+    store.clearAllTransactions = () => {
+        tps.clearAllTransactions();
+    }
+
+    store.addCreateSongTransaction = (index, title, artist, youTubeId) => {
+        // ADD A SONG ITEM AND ITS NUMBER
+        let song = {
+            title: title,
+            artist: artist,
+            youTubeId: youTubeId
+        };
+        let transaction = new CreateSong_Transaction(store, index, song);
+        tps.addTransaction(transaction);
+    }
+
+    store.addMoveSongTransaction = (start, end) => {
+        let transaction = new MoveSong_Transaction(store, start, end);
+        tps.addTransaction(transaction);
+    }
+    // THIS FUNCTION ADDS A RemoveSong_Transaction TO THE TRANSACTION STACK
+    store.addRemoveSongTransaction = (index) => {
+        let song = store.expandedPlaylist.songs[index];
+        let transaction = new RemoveSong_Transaction(store, index, song);
+        tps.addTransaction(transaction);
+    }
+
+    store.addUpdateSongTransaction = (index, title: string, artist: string, youTubeId: string) => {
+        let song = store.expandedPlaylist.songs[index];
+        let oldSongData = {
+            title: song.title,
+            artist: song.artist,
+            youTubeId: song.youTubeId
+        };
+        let newSongData = {
+            title, artist, youTubeId
+        };
+        let transaction = new UpdateSong_Transaction(this, index, oldSongData, newSongData);
+        tps.addTransaction(transaction);
+    }
+
+    store.updateExpandedPlaylist = async () => {
+        const response = await updatePlaylistDetails(store.expandedPlaylist);
+        if (response && 'playlist' in response) {
+            storeReducer({
+                type: GlobalStoreActionType.UPDATE_PLAYLIST,
+                payload: response.playlist
+            });
+            storeReducer({
+                type: GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST,
+                payload: response.playlist
+            });
+        } else {
+            console.error("uh oh");
+        }
+    }
+
+    store.publishExpandedPlaylist = async () => {
+        store.expandedPlaylist.isPublished = true;
+        const response = await updatePlaylistDetails(store.expandedPlaylist);
+        if (response && 'playlist' in response) {
+            storeReducer({
+                type: GlobalStoreActionType.UPDATE_PLAYLIST,
+                payload: response.playlist
+            });
+            storeReducer({
+                type: GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST,
+                payload: response.playlist
+            });
+        } else {
+            console.error("uh oh");
+        }
+    }
+
+    store.createSong = (index: number, song: { title: string, artist: string, youTubeId: string }) => {
+        store.expandedPlaylist.songs.splice(index, 0, song);
+        store.updateExpandedPlaylist();
+    }
+
+    store.removeSong = (index: number) => {
+        store.expandedPlaylist.songs.splice(index, 1);
+        store.updateExpandedPlaylist();
+    }
+
+    store.moveSong = (start: number, end: number) => {
+        const list = store.expandedPlaylist;
+        if (start < end) {
+            let temp = list.songs[start];
+            for (let i = start; i < end; i++) {
+                list.songs[i] = list.songs[i + 1];
+            }
+            list.songs[end] = temp;
+        }
+        else if (start > end) {
+            let temp = list.songs[start];
+            for (let i = start; i > end; i--) {
+                list.songs[i] = list.songs[i - 1];
+            }
+            list.songs[end] = temp;
+        }
+
+        store.updateExpandedPlaylist();
+    }
+
+    store.updateSong = (index: number, song: { title: string, artist: string, youTubeId: string }) => {
+        store.expandedPlaylist.songs[index].artist = song.artist;
+        store.expandedPlaylist.songs[index].title = song.title;
+        store.expandedPlaylist.songs[index].youTubeId = song.youTubeId;
+        store.updateExpandedPlaylist();
+    }
+
+    store.undo = () => {
+        tps.undoTransaction();
+    }
+
+    store.redo = () => {
+        tps.doTransaction();
+    }
+
+    store.canUndo = () => {
+        return tps.hasTransactionToUndo();
+    }
+
+    store.canRedo = () => {
+        return tps.hasTransactionToRedo();
     }
 
     // store.init = () => {
