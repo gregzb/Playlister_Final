@@ -37,6 +37,7 @@ export enum ModalType {
     DELETE_LIST,
     EDIT_SONG,
     DELETE_SONG,
+    DUPLICATE_RENAME,
 };
 
 export enum HomeView {
@@ -87,6 +88,7 @@ const defaultStoreState: {
     }[]) => void,
     setExpandedPlaylist?: (playlist: Playlist) => void,
     updateExpandedPlaylist?: () => void,
+    updatePlaylist?: (playlist: Playlist) => Promise<{error: boolean, alreadyExists: boolean}>,
     publishExpandedPlaylist?: () => void,
     deleteExpandedPlaylist?: () => void,
     setModal?: (modal: ModalType) => void,
@@ -543,8 +545,27 @@ export const GlobalStoreContextProvider = (props: {
                 payload: response.playlist
             });
         } else {
-            console.error("uh oh");
+            console.error(response);
         }
+    }
+
+    store.updatePlaylist = async (playlist: Playlist) => {
+        const response = await updatePlaylistDetails(playlist);
+        if (response && 'playlist' in response) {
+            storeReducer({
+                type: GlobalStoreActionType.UPDATE_PLAYLIST,
+                payload: response.playlist
+            });
+            storeReducer({
+                type: GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST,
+                payload: (response.playlist._id === store.expandedPlaylist?._id ? response.playlist : store.expandedPlaylist)
+            });
+        } else {
+            console.error(response);
+        }
+
+        const alreadyExists = 'alreadyExists' in response ? (response as any).alreadyExists : false;
+        return {error: response.error, alreadyExists};
     }
 
     store.publishExpandedPlaylist = async () => {

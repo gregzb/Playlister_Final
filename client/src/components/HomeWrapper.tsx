@@ -11,6 +11,7 @@ import { HomeHeader } from "./HomeHeader"
 import { DeletePlaylistModal } from "./DeletePlaylistModal"
 import { DeleteSongModal } from "./DeleteSongModal"
 import { EditSongModal } from "./EditSongModal"
+import { DuplicateRenameModal } from "./DuplicateRenameModal"
 
 import type { Playlist } from "../store"
 
@@ -296,6 +297,32 @@ export const HomeWrapper = () => {
         }
     }
 
+    const [editingPlaylist, setEditingPlaylist] = useState(null);
+    const [editingPlaylistName, setEditingPlaylistName] = useState("");
+
+    const playlistNameClickHandler = (playlist: Playlist) => {
+        return (e: any) => {
+            e.stopPropagation();
+            if (e.detail === 2 && !playlist.isPublished) {
+                setEditingPlaylist(playlist);
+                setEditingPlaylistName(playlist.name);
+            }
+        }
+    }
+
+    const handleEditKeyDown = async (e: any) => {
+        if (e.key === "Enter") {
+            editingPlaylist.name = editingPlaylistName;
+            const updated = await store.updatePlaylist(editingPlaylist);
+            if (!updated.error) {
+                setEditingPlaylist(null);
+            }
+            if (updated.alreadyExists) {
+                store.setModal(ModalType.DUPLICATE_RENAME);
+            }
+        }
+    };
+
     // console.log(playlistsSorted);
     const playlistEls = playlistsSorted.map((playlist: Playlist) => {
         const backgroundColor = isSelected(playlist) ? " #ffdd99" : (playlist.isPublished ? "#cce6ff" : "initial");
@@ -306,7 +333,10 @@ export const HomeWrapper = () => {
                     <CardContent>
                         <Grid container>
                             <Grid item xs={8}>
-                                <Typography variant="h5">{playlist.name}</Typography>
+                                {editingPlaylist?._id === playlist._id ?
+                                <TextField onKeyDown={handleEditKeyDown} onClick={playlistNameClickHandler(playlist)} value={editingPlaylistName} onChange={(e) => setEditingPlaylistName(e.target.value)} label="" variant="standard" />
+                                :<Typography variant="h5"><span onClick={playlistNameClickHandler(playlist)}>{playlist.name}</span></Typography>
+                                }
                                 <Typography variant="body1">By: <Link onClick={handleClickUsername(playlist.username)}>{playlist.username}</Link></Typography>
                             </Grid>
                             <Grid item xs={4}></Grid>
@@ -349,5 +379,6 @@ export const HomeWrapper = () => {
         <DeletePlaylistModal />
         <DeleteSongModal />
         <EditSongModal key={(currSong?.title ?? "") + "|" + (currSong?.artist ?? "") + "|" + (currSong?.youTubeId ?? "")} />
+        <DuplicateRenameModal />
     </Card>);
 }
