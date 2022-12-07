@@ -228,24 +228,27 @@ updatePlaylistInteractions = async (req, res) => {
         return res.status(400).json({
             error: true,
             errorMsg: 'You must provide a body to update',
+            playlist: null
         })
     }
 
-    Playlist.findOne({ _id: req.params.id }, (err, playlist) => {
-        if (err) {
+    Playlist.findOne({ _id: req.params.id }, (err, list) => {
+        if (err || !list) {
             return res.status(404).json({
                 err,
                 error: true,
                 errorMsg: 'Playlist not found!',
+                playlist: null
             });
         }
-        if (!playlist.isPublished) {
+        if (!list.isPublished) {
             return res.status(400).json({
                 error: true,
                 errorMsg: "Playlist isn't published yet!",
+                playlist: list
             });
         }
-        console.log("playlist found: " + JSON.stringify(playlist));
+        console.log("playlist found: " + JSON.stringify(list));
 
         // list.name = body.name;
         // list.songs = body.songs;
@@ -274,9 +277,9 @@ updatePlaylistInteractions = async (req, res) => {
                     // error,
                     error: true,
                     errorMsg: 'Playlist not updated: ' + JSON.stringify(err),
+                    playlist: list
                 })
             });
-        asyncFindUser(playlist);
     })
 }
 
