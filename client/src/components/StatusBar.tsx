@@ -8,15 +8,13 @@ import Button from "@mui/material/Button";
 
 export const StatusBar = (props: {style: any}) => {
     const store = useContext(GlobalStoreContext);
-    const addNewListHandler = async () => {
-        await store.createPlaylist("", []);
-        store.loadPlaylistsWrapper();
-        // console.log("new list");
+    const addNewListHandler = () => {
+        store.createPlaylist("", []);
     };
     if (store.currentHomeView === HomeView.OWN) {
         return (
         <Button onClick={addNewListHandler}>
-            <Typography style={{...props.style}} align="center" variant="h2">+ Your Lists</Typography>
+            <Typography style={{...props.style}} align="center" variant="h3">+ Your Lists</Typography>
         </Button>
         );
     } else if (store.currentHomeView === HomeView.ALL) {

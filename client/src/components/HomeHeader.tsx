@@ -44,7 +44,7 @@ export const HomeHeader = () => {
 
     const [sortAnchorEl, setSortAnchorEl] = React.useState<null | HTMLElement>(null);
 
-    const [tmpSearchText, setTmpSearchText] = useState("");
+    const [tmpSearchText, setTmpSearchText] = useState(store.searchText);
 
     const handleSortMenu = (event: React.MouseEvent<HTMLElement>) => {
         setSortAnchorEl(event.currentTarget);

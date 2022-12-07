@@ -10,6 +10,8 @@ const baseUrl = "http://localhost:4000/api/";
 export type Playlist = {
     _id: string;
     name: string;
+    ownerEmail: string;
+    username: string;
     songs: {
         title: string,
         artist: string,

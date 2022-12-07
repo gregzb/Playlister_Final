@@ -16,6 +16,7 @@ export enum GlobalStoreActionType {
     CHANGE_PUBLISHED_SORT_DIRECTION,
     CHANGE_SEARCH_TEXT,
     CHANGE_LOADED_PLAYLISTS,
+    CHANGE_EXPANDED_PLAYLIST,
 };
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -56,6 +57,7 @@ const defaultStoreState: {
     unpublishedSortDirection: UnpublishedSortDirection,
     publishedSortDirection: PublishedSortDirection,
     loadedPlaylists: Playlist[],
+    expandedPlaylist: Playlist | null,
 
     setHomeView: (newView: HomeView) => void,
     setUnpublishedSortDirection: (_: UnpublishedSortDirection) => void,
@@ -64,12 +66,13 @@ const defaultStoreState: {
     loadOwnPlaylists: () => void
     loadAllPlaylists: () => void
     loadUserPlaylists: (_: string) => void
-    loadPlaylistsWrapper: () => void,
+    loadPlaylistsWrapper: (newView: HomeView) => void,
     createPlaylist: (name: string, songs: {
         title: string,
         artist: string,
         youTubeId: string
     }[]) => void,
+    setExpandedPlaylist: (playlist: Playlist) => void,
 } = {
     currentModal: ModalType.NONE,
     currentHomeView: HomeView.NONE,
@@ -77,6 +80,7 @@ const defaultStoreState: {
     unpublishedSortDirection: UnpublishedSortDirection.NAME,
     publishedSortDirection: PublishedSortDirection.NAME,
     loadedPlaylists: [],
+    expandedPlaylist: null,
 
     setHomeView: (_: HomeView) => {},
     setUnpublishedSortDirection: (_: UnpublishedSortDirection) => {},
@@ -85,8 +89,9 @@ const defaultStoreState: {
     loadOwnPlaylists: () => {},
     loadAllPlaylists: () => {},
     loadUserPlaylists: (_: string) => {},
-    loadPlaylistsWrapper: () => {},
-    createPlaylist: () => {}
+    loadPlaylistsWrapper: (newView: HomeView) => {},
+    createPlaylist: () => {},
+    setExpandedPlaylist: (playlist: Playlist) => {}
 };
 
 export const GlobalStoreContext = createContext(defaultStoreState);
@@ -137,6 +142,11 @@ export const GlobalStoreContextProvider = (props: {
                     ...prev,
                     loadedPlaylists: payload
                 }));
+            }case GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST: {
+                return setStore(prev => ({
+                    ...prev,
+                    expandedPlaylist: payload
+                })); 
             }
             // // LIST UPDATE OF ITS NAME
             // case GlobalStoreActionType.CHANGE_LIST_NAME: {
@@ -294,13 +304,13 @@ export const GlobalStoreContextProvider = (props: {
         }
     }
 
-    store.loadPlaylistsWrapper = () => {
-        if (store.currentHomeView === HomeView.OWN) {
+    store.loadPlaylistsWrapper = (newView: HomeView) => {
+        if (newView === HomeView.OWN) {
             store.loadOwnPlaylists();
-        } else if (store.currentHomeView === HomeView.ALL) {
+        } else if (newView === HomeView.ALL) {
             store.loadAllPlaylists();
-        } else if (store.currentHomeView === HomeView.USER) {
-            store.loadUserPlaylists(store.searchText);
+        } else if (newView === HomeView.USER) {
+            store.loadUserPlaylists("");
         }
     }
 
@@ -312,10 +322,11 @@ export const GlobalStoreContextProvider = (props: {
         // } else if (newView === HomeView.USER) {
         //     store.loadUserPlaylists("");
         // }
+        store.loadPlaylistsWrapper(newView);
         storeReducer({type: GlobalStoreActionType.CHANGE_HOME_VIEW, payload: newView});
-        setTimeout(() => {
-            store.loadPlaylistsWrapper();
-        }, 1000);
+        // setTimeout(() => {
+        //     store.loadPlaylistsWrapper();
+        // }, 1000);
         // store.loadPlaylistsWrapper();
     }
 
@@ -360,6 +371,11 @@ export const GlobalStoreContextProvider = (props: {
 
     store.createPlaylist = async (name, songs) => {
         const res = await createPlaylist(name, songs);
+        store.loadPlaylistsWrapper(HomeView.OWN);
+    }
+
+    store.setExpandedPlaylist = (playlist: Playlist) => {
+        storeReducer({type: GlobalStoreActionType.CHANGE_EXPANDED_PLAYLIST, payload: playlist});
     }
 
     // store.init = () => {
