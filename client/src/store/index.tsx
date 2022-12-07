@@ -456,7 +456,7 @@ export const GlobalStoreContextProvider = (props: {
         let newSongData = {
             title, artist, youTubeId
         };
-        let transaction = new UpdateSong_Transaction(this, index, oldSongData, newSongData);
+        let transaction = new UpdateSong_Transaction(store, index, oldSongData, newSongData);
         tps.addTransaction(transaction);
     }
 

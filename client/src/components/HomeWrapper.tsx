@@ -223,6 +223,8 @@ export const HomeWrapper = () => {
         }
     });
 
+    const currSong = store.expandedPlaylist?.songs[store.markedSongIndex];
+
     return (<Card style={{ flexGrow: 1, margin: 15, display: "flex", flexDirection: "column" }}>
         <HomeHeader key={searchKey} />
         <Paper style={{ marginTop: 10, marginBottom: 10, height: "0px", flexGrow: 1, flexBasis: 0, maxHeight: "100%" }} elevation={8}>
@@ -242,6 +244,6 @@ export const HomeWrapper = () => {
         <StatusBar style={{ margin: 5, padding: 5 }}></StatusBar>
         <DeletePlaylistModal/>
         <DeleteSongModal/>
-        <EditSongModal/>
+        <EditSongModal key={(currSong?.title??"")+"|"+(currSong?.artist??"")+"|"+(currSong?.youTubeId??"")}/>
     </Card>);
 }

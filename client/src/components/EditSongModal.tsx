@@ -28,9 +28,6 @@ export const EditSongModal = () => {
     const store = useContext(GlobalStoreContext);
 
     const currSong = store.expandedPlaylist?.songs[store.markedSongIndex];
-    console.log(store.expandedPlaylist?.songs);
-    console.log(store.markedSongIndex);
-    console.log(JSON.stringify(currSong));
 
     const [ title, setTitle ] = useState(currSong?.title ?? "");
     const [ artist, setArtist ] = useState(currSong?.artist ?? "");
