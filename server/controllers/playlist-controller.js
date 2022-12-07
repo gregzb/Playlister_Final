@@ -28,6 +28,7 @@ createPlaylist = async (req, res) => {
         });
     }
     body.ownerEmail = user.email;
+    body.username = user.username;
 
     if (body.name === "") body.name = `Untitled ${user.playlists.length}`
 
@@ -141,6 +142,7 @@ updatePlaylistDetails = async (req, res) => {
         return res.status(400).json({
             error: true,
             errorMsg: 'You must provide a body or name to update',
+            playlist: null
         })
     }
 
@@ -150,12 +152,14 @@ updatePlaylistDetails = async (req, res) => {
                 err,
                 error: true,
                 errorMsg: 'Playlist not found!',
+                playlist: null
             });
         }
         if (playlist.isPublished) {
             return res.status(400).json({
                 error: true,
                 errorMsg: 'Playlist is already published!',
+                playlist: playlist
             });
         }
         console.log("playlist found: " + JSON.stringify(playlist));
@@ -169,14 +173,16 @@ updatePlaylistDetails = async (req, res) => {
                     console.log("correct user!");
                     console.log("req.body.name: " + req.body.name);
 
-                    const playlistFound = await Playlist.findOne({ownerEmail: body.ownerEmail, name: body.name});
-                    if (playlistFound) {
-                        return res.status(400).json({ error: true, errorMsg: "A playlist with that name already exists for the current user" });
+                    if (body.name !== list.name) {
+                        const playlistFound = await Playlist.findOne({ownerEmail: body.ownerEmail, name: body.name});
+                        if (playlistFound) {
+                            return res.status(400).json({ error: true, errorMsg: "A playlist with that name already exists for the current user", playlist: list });
+                        }
                     }
 
                     list.name = body.name;
                     list.songs = body.songs;
-                    list.lastEditedDate = body.lastEditedDate;
+                    list.lastEditedDate = new Date();
                     list.isPublished = body.isPublished;
                     if (list.isPublished) {
                         list.publishDate = new Date();
@@ -198,12 +204,13 @@ updatePlaylistDetails = async (req, res) => {
                                 // error,
                                 error: true,
                                 errorMsg: 'Playlist not updated: ' + JSON.stringify(err),
+                                playlist: list
                             })
                         })
                 }
                 else {
                     console.log("incorrect user!");
-                    return res.status(400).json({ error: true, errorMsg: "authentication error for detail update" });
+                    return res.status(400).json({ error: true, errorMsg: "authentication error for detail update", playlist: list });
                 }
             });
         }
