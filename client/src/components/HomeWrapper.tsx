@@ -149,7 +149,7 @@ export const HomeWrapper = () => {
 
             const handleDragStart = (index: number) => {
                 return (event: React.DragEvent) => {
-                    event.dataTransfer.setData("song", index);
+                    event.dataTransfer.setData("song", ""+index);
                 }
             }
 
@@ -231,9 +231,14 @@ export const HomeWrapper = () => {
         }
     }
 
-    const playlistsUnsorted = store.loadedPlaylists;
+    const playlistsUnsorted = store.loadedPlaylists.filter((playlist) => {
+        if (store.currentHomeView === HomeView.USER) {
+            return true;
+        } else {
+            return playlist.name.includes(store.searchText ?? "");
+        }
+    });
     const playlistsSorted = [...playlistsUnsorted];
-    console.log(playlistsUnsorted[0]);
     playlistsSorted.sort((a, b) => {
         if (store.currentHomeView === HomeView.OWN) {
             if (store.unpublishedSortDirection === UnpublishedSortDirection.NAME) {
