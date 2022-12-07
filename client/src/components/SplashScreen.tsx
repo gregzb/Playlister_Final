@@ -1,5 +1,8 @@
 import * as React from "react";
+import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { AuthContext } from '../auth'
 
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -12,7 +15,15 @@ import Link from '@mui/material/Link';
 import logoUrl from '/assets/logo.png';
 
 export const SplashScreen = () => {
+    const auth = useContext(AuthContext);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (auth.loggedIn) {
+            navigate("/home");
+        }
+    }, [auth.loggedIn]);
+
     return (
         <Container maxWidth="md">
             <Grid

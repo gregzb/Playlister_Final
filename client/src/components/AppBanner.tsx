@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import Menu from '@mui/material/Menu';
@@ -9,6 +9,7 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import Typography from "@mui/material/Typography";
 
 import { AuthContext } from '../auth'
 
@@ -50,6 +51,16 @@ export const AppBanner = () => {
         navigate("/login");
     }
 
+    const handleLogout = async () => {
+        handleClose();
+        auth.logout();
+        setTimeout(() => {
+            navigate("/");
+        }, 50);
+    }
+
+    console.log(auth.loggedIn);
+
     return (
         <AppBar sx={{ bgcolor: "rgb(224,224,224)" }} position="static">
             <Toolbar>
@@ -67,7 +78,11 @@ export const AppBanner = () => {
                     onClick={handleMenu}
                 // color="inherit"
                 >
-                    <AccountCircle />
+                    {
+                        auth.loggedIn ?
+                        (<Typography variant="h5">{auth.getUserInitials()}</Typography>)
+                        :(<AccountCircle />)
+                    }
                 </IconButton>
                 <Menu
                     sx={{ mt: '45px' }}
@@ -86,7 +101,7 @@ export const AppBanner = () => {
                     onClose={handleClose}
                 >
                     {auth.loggedIn ? (
-                        <MenuItem onClick={handleClose}>Logout</MenuItem>) : (
+                        <MenuItem onClick={handleLogout}>Logout</MenuItem>) : (
                         [
                             <MenuItem key="create_acc" onClick={handleRegister}>Create New Account</MenuItem>,
                             <MenuItem key="login_acc" onClick={handleLogin}>Login</MenuItem>

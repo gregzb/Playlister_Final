@@ -6,24 +6,87 @@ import { TPS } from "../common/tps";
 // import api from './store-request-api'
 import { AuthContext } from "../auth";
 
-enum GlobalStoreActionType {
+import {createPlaylist, getPlaylists} from "./requests-api";
+import type {Playlist} from "./requests-api";
+export type {Playlist} from "./requests-api";
 
+export enum GlobalStoreActionType {
+    CHANGE_HOME_VIEW,
+    CHANGE_UNPUBLISHED_SORT_DIRECTION,
+    CHANGE_PUBLISHED_SORT_DIRECTION,
+    CHANGE_SEARCH_TEXT,
+    CHANGE_LOADED_PLAYLISTS,
 };
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
 const tps = new TPS();
 
-enum ModalType {
+export enum ModalType {
     NONE,
     DELETE_LIST,
     EDIT_SONG,
     DELETE_SONG,
 };
 
+export enum HomeView {
+    NONE,
+    OWN,
+    ALL,
+    USER
+};
+
+export enum UnpublishedSortDirection {
+    NAME,
+    CREATION_DATE,
+    LAST_EDIT_DATE,
+};
+
+export enum PublishedSortDirection {
+    NAME,
+    PUBLISH_DATE,
+    LISTENS,
+    LIKES,
+    DISLIKES,
+};
+
 const defaultStoreState: {
-    currentModal: ModalType
+    currentModal: ModalType,
+    currentHomeView: HomeView,
+    searchText: string | null,
+    unpublishedSortDirection: UnpublishedSortDirection,
+    publishedSortDirection: PublishedSortDirection,
+    loadedPlaylists: Playlist[],
+
+    setHomeView: (newView: HomeView) => void,
+    setUnpublishedSortDirection: (_: UnpublishedSortDirection) => void,
+    setPublishedSortDirection: (_: PublishedSortDirection) => void,
+    setSearchText: (_: string) => void
+    loadOwnPlaylists: () => void
+    loadAllPlaylists: () => void
+    loadUserPlaylists: (_: string) => void
+    loadPlaylistsWrapper: () => void,
+    createPlaylist: (name: string, songs: {
+        title: string,
+        artist: string,
+        youTubeId: string
+    }[]) => void,
 } = {
-    currentModal: ModalType.NONE
+    currentModal: ModalType.NONE,
+    currentHomeView: HomeView.NONE,
+    searchText: null,
+    unpublishedSortDirection: UnpublishedSortDirection.NAME,
+    publishedSortDirection: PublishedSortDirection.NAME,
+    loadedPlaylists: [],
+
+    setHomeView: (_: HomeView) => {},
+    setUnpublishedSortDirection: (_: UnpublishedSortDirection) => {},
+    setPublishedSortDirection: (_: PublishedSortDirection) => {},
+    setSearchText: (_: string) => {},
+    loadOwnPlaylists: () => {},
+    loadAllPlaylists: () => {},
+    loadUserPlaylists: (_: string) => {},
+    loadPlaylistsWrapper: () => {},
+    createPlaylist: () => {}
 };
 
 export const GlobalStoreContext = createContext(defaultStoreState);
@@ -47,6 +110,34 @@ export const GlobalStoreContextProvider = (props: {
     const storeReducer = (action: { type: GlobalStoreActionType, payload: any }) => {
         const { type, payload } = action;
         switch (type) {
+            case GlobalStoreActionType.CHANGE_HOME_VIEW: {
+                return setStore(prev => ({
+                    ...prev,
+                    currentHomeView: payload,
+                    searchText: null
+                }));
+            }
+            case GlobalStoreActionType.CHANGE_PUBLISHED_SORT_DIRECTION: {
+                return setStore(prev => ({
+                    ...prev,
+                    publishedSortDirection: payload
+                }));
+            }case GlobalStoreActionType.CHANGE_UNPUBLISHED_SORT_DIRECTION: {
+                return setStore(prev => ({
+                    ...prev,
+                    unpublishedSortDirection: payload
+                }));
+            }case GlobalStoreActionType.CHANGE_SEARCH_TEXT: {
+                return setStore(prev => ({
+                    ...prev,
+                    searchText: payload
+                }));
+            }case GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS: {
+                return setStore(prev => ({
+                    ...prev,
+                    loadedPlaylists: payload
+                }));
+            }
             // // LIST UPDATE OF ITS NAME
             // case GlobalStoreActionType.CHANGE_LIST_NAME: {
             //     return setStore(prev => ({
@@ -201,6 +292,74 @@ export const GlobalStoreContextProvider = (props: {
             default:
                 return store;
         }
+    }
+
+    store.loadPlaylistsWrapper = () => {
+        if (store.currentHomeView === HomeView.OWN) {
+            store.loadOwnPlaylists();
+        } else if (store.currentHomeView === HomeView.ALL) {
+            store.loadAllPlaylists();
+        } else if (store.currentHomeView === HomeView.USER) {
+            store.loadUserPlaylists(store.searchText);
+        }
+    }
+
+    store.setHomeView = async (newView: HomeView) => {
+        // if (newView === HomeView.OWN) {
+        //     store.loadOwnPlaylists();
+        // } else if (newView === HomeView.ALL) {
+        //     store.loadAllPlaylists();
+        // } else if (newView === HomeView.USER) {
+        //     store.loadUserPlaylists("");
+        // }
+        storeReducer({type: GlobalStoreActionType.CHANGE_HOME_VIEW, payload: newView});
+        setTimeout(() => {
+            store.loadPlaylistsWrapper();
+        }, 1000);
+        // store.loadPlaylistsWrapper();
+    }
+
+    store.setUnpublishedSortDirection = (newSortDirection: UnpublishedSortDirection) => {
+        storeReducer({type: GlobalStoreActionType.CHANGE_UNPUBLISHED_SORT_DIRECTION, payload: newSortDirection});
+    }
+
+    store.setPublishedSortDirection = (newSortDirection: PublishedSortDirection) => {
+        storeReducer({type: GlobalStoreActionType.CHANGE_PUBLISHED_SORT_DIRECTION, payload: newSortDirection});
+    }
+
+    store.setSearchText = (newSearchText: string) => {
+        storeReducer({type: GlobalStoreActionType.CHANGE_SEARCH_TEXT, payload: newSearchText});
+    }
+
+    store.loadOwnPlaylists = async () => {
+        const res = await getPlaylists("own");
+        if (res.error === true) {
+            console.error("Couldn't get own playlists");
+            return;
+        }
+        storeReducer({type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: res.playlists});
+    }
+
+    store.loadAllPlaylists = async () => {
+        const res = await getPlaylists("all");
+        if (res.error === true) {
+            console.error("Couldn't get all playlists");
+            return;
+        }
+        storeReducer({type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: res.playlists});
+    }
+
+    store.loadUserPlaylists = async (username: string) => {
+        const res = await getPlaylists("user", username);
+        if (res.error === true) {
+            console.error("Couldn't get user playlists");
+            return;
+        }
+        storeReducer({type: GlobalStoreActionType.CHANGE_LOADED_PLAYLISTS, payload: res.playlists});
+    }
+
+    store.createPlaylist = async (name, songs) => {
+        const res = await createPlaylist(name, songs);
     }
 
     // store.init = () => {

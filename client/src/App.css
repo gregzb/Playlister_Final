@@ -4,3 +4,15 @@
     /* background-repeat: no-repeat; */
     background-attachment: fixed;
 }
+
+#root {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    height:100%;
+}
+
+html,body {
+    height:100%;
+    overflow-y: hidden;
+}

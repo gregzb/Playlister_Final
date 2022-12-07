@@ -10,7 +10,7 @@ enum AuthActionType {
 };
 
 const defaultAuthState: {
-    loggedIn: boolean;
+    loggedIn: boolean | null;
     user: User | null;
     accountError: {
         error: boolean;
@@ -23,10 +23,10 @@ const defaultAuthState: {
     register: (username: string, firstName: string, lastName: string, email: string, password: string) => void,
     login: (email: string, password: string) => void,
     logout: () => void,
-    getUserInitials: () => string,
+    getUserInitials: () => string
 } = {
     user: null,
-    loggedIn: false,
+    loggedIn: null,
     accountError: {
         error: false,
         message: "",
@@ -38,7 +38,7 @@ const defaultAuthState: {
     register: (username: string, firstName: string, lastName: string, email: string, password: string) => {},
     login: (email: string, password: string) => {},
     logout: () => {},
-    getUserInitials: () => "bruh",
+    getUserInitials: () => "ZZZ",
 };
 
 export const AuthContext = createContext(defaultAuthState);
@@ -103,7 +103,7 @@ export const AuthContextProvider = (props: {
         const response = await getLoggedIn();
         if (!response) return auth.setAccountError("Couldn't establish connection to server?");
         if (response.error === false) {
-            const v = response;
+            console.log(response);
             authReducer({
                 type: AuthActionType.SET_LOGGED_IN,
                 payload: {
@@ -121,14 +121,14 @@ export const AuthContextProvider = (props: {
         const response = await register(username, firstName, lastName, email, password);
         if (!response) return auth.setAccountError("Couldn't establish connection to server?");
         if (response.error === false) {
-            authReducer({
-                type: AuthActionType.SET_LOGGED_IN,
-                payload: {
-                    loggedIn: true,
-                    user: response.user
-                }
-            });
-            navigate("/home/");
+            // authReducer({
+            //     type: AuthActionType.SET_LOGGED_IN,
+            //     payload: {
+            //         loggedIn: true,
+            //         user: response.user
+            //     }
+            // });
+            navigate("/login");
         } else {
             const errMsg = response.errorMsg!;
             auth.setAccountError(errMsg);
@@ -146,7 +146,7 @@ export const AuthContextProvider = (props: {
                     user: response.user
                 }
             });
-            navigate("/home/");
+            navigate("/home");
         } else {
             const errMsg = response.errorMsg!;
             auth.setAccountError(errMsg);
@@ -164,7 +164,6 @@ export const AuthContextProvider = (props: {
                     user: null
                 }
             });
-            navigate("/home/");
         } else {
             const errMsg = response.errorMsg!;
             auth.setAccountError(errMsg);
@@ -173,7 +172,7 @@ export const AuthContextProvider = (props: {
 
     auth.getUserInitials = () => {
         console.log("getting user initials");
-        return auth.user ? (auth.user.firstName.charAt(0) + auth.user.firstName.charAt(0)) : "";
+        return auth.user ? (auth.user.firstName.charAt(0) + auth.user.lastName.charAt(0)) : "";
     }
 
     useEffect(() => {

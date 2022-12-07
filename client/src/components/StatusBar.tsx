@@ -1,5 +1,29 @@
 import * as React from "react";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export const StatusBar = () => {
-    return (<div></div>)
+import { GlobalStoreContext, HomeView } from '../store'
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+
+export const StatusBar = (props: {style: any}) => {
+    const store = useContext(GlobalStoreContext);
+    const addNewListHandler = async () => {
+        await store.createPlaylist("", []);
+        store.loadPlaylistsWrapper();
+        // console.log("new list");
+    };
+    if (store.currentHomeView === HomeView.OWN) {
+        return (
+        <Button onClick={addNewListHandler}>
+            <Typography style={{...props.style}} align="center" variant="h2">+ Your Lists</Typography>
+        </Button>
+        );
+    } else if (store.currentHomeView === HomeView.ALL) {
+        const searchTerm = store.searchText ?? "";
+        return (<Typography style={{...props.style}} align="center" variant="h2">{searchTerm} Playlists</Typography>);
+    } else {
+        const searchTerm = store.searchText ?? "";
+        return (<Typography style={{...props.style}} align="center" variant="h2">{searchTerm} Lists</Typography>);
+    }
 };

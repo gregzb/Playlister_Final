@@ -9,5 +9,9 @@ export default defineConfig({
     },
     resolve: {
         // preserveSymlinks: true
+    },
+    server: {
+        host: "localhost",
+        port: 3000
     }
 });
