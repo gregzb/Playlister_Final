@@ -176,7 +176,7 @@ updatePlaylistDetails = async (req, res) => {
                     if (body.name !== list.name) {
                         const playlistFound = await Playlist.findOne({ownerEmail: body.ownerEmail, name: body.name});
                         if (playlistFound) {
-                            return res.status(400).json({ error: true, errorMsg: "A playlist with that name already exists for the current user", playlist: list });
+                            return res.status(400).json({ error: true, errorMsg: "A playlist with that name already exists for the current user", playlist: list, alreadyExists: true });
                         }
                     }
 
