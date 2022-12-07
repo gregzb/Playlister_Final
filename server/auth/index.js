@@ -5,6 +5,7 @@ function authManager() {
         // console.log("req: " + req);
         // console.log("next: " + next);
         // console.log("Who called verify?");
+        console.log("verify cookies: ", JSON.stringify(req.cookies));
         try {
             const token = req.cookies.token;
             if (!token) {
@@ -33,6 +34,7 @@ function authManager() {
     }
 
     verifyUser = (req) => {
+        console.log("verifyUser cookies: ", JSON.stringify(req.cookies));
         try {
             const token = req.cookies.token;
             if (!token) {

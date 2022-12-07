@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs')
 getLoggedIn = async (req, res) => {
     try {
         let userId = auth.verifyUser(req);
+        console.log("getting logged in:", JSON.stringify(userId));
         if (!userId) {
             return res.status(200).json({
                 error: false,
@@ -14,7 +15,7 @@ getLoggedIn = async (req, res) => {
                     firstName: "",
                     lastName: "",
                     username: "",
-                    email: ""
+                    email: "",
                 }
             });
             // return res.status(200).json({
@@ -24,9 +25,21 @@ getLoggedIn = async (req, res) => {
             //     errorMessage: "?"
             // })
         }
-
         const loggedInUser = await User.findOne({ _id: userId });
         console.log("loggedInUser: " + loggedInUser);
+
+        if (!loggedInUser) {
+            return res.status(200).json({
+                error: false,
+                loggedIn: false,
+                user: {
+                    firstName: "",
+                    lastName: "",
+                    username: "",
+                    email: "",
+                }
+            });
+        }
 
         return res.status(200).json({
             error: false,
@@ -35,7 +48,7 @@ getLoggedIn = async (req, res) => {
                 firstName: loggedInUser.firstName,
                 lastName: loggedInUser.lastName,
                 username: loggedInUser.username,
-                email: loggedInUser.email
+                email: loggedInUser.email,
             }
         })
     } catch (err) {
@@ -50,6 +63,8 @@ loginUser = async (req, res) => {
     console.log("loginUser");
     try {
         const { email, password } = req.body;
+
+        console.log(req.body);
 
         if (!email || !password) {
             return res.status(400).json({ error: true, errorMsg: "Please enter all required fields;" });
@@ -92,7 +107,7 @@ loginUser = async (req, res) => {
                 firstName: existingUser.firstName,
                 lastName: existingUser.lastName,
                 username: existingUser.username,
-                email: existingUser.email              
+                email: existingUser.email,
             }
         })
 
@@ -185,7 +200,7 @@ registerUser = async (req, res) => {
 
         // console.log("token sent");
 
-        return res.stats(200).json({
+        return res.status(200).json({
             error: false
         });
 

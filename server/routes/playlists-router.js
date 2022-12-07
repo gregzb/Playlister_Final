@@ -22,7 +22,7 @@ router.get('/playlist/:id', auth.verify, PlaylistController.getPlaylistById)
 router.put('/playlist/details/:id', auth.verify, PlaylistController.updatePlaylistDetails)
 router.put('/playlist/interactions/:id', auth.verify, PlaylistController.updatePlaylistInteractions)
 router.get('/playlists/own', auth.verify, PlaylistController.getOwnPlaylists)
-router.get('/playlists/all', auth.verify, PlaylistController.getOwnPlaylists)
-router.get('/playlists/user', auth.verify, PlaylistController.getAllPlaylists)
+router.get('/playlists/all', auth.verify, PlaylistController.getAllPlaylists)
+router.get('/playlists/user', auth.verify, PlaylistController.getUserPlaylists)
 
 module.exports = router

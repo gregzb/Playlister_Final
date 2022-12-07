@@ -17,6 +17,7 @@ const playlistSchema = new Schema(
         }], required: true },
         isPublished: {type: Boolean, required: true},
         publishDate: {type: Date, required: true},
+        lastEditedDate: {type: Date, required: true},
 
         // usernames
         likes: {type: [String], required: true},
