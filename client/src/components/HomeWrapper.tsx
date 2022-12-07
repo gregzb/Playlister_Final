@@ -102,8 +102,12 @@ export const HomeWrapper = () => {
         }
     };
 
-    const isSelected = (playlist: Playlist) => {
+    const isExpanded = (playlist: Playlist) => {
         return store.expandedPlaylist?._id === playlist._id;
+    };
+
+    const isSelected = (playlist: Playlist) => {
+        return store.selectedPlaylist?._id === playlist._id;
     };
 
     const currentlyPlayingSongIndex = 2;
@@ -116,9 +120,7 @@ export const HomeWrapper = () => {
                         {playlist.songs.map((song, idx) => {
                             return (
                                 <Grid key={"" + idx + "|" + song.title + "|" + song.artist + "|" + song.youTubeId} item xs={12}>
-                                    {/* <Card sx={{ m: 1 }}> */}
                                     <Typography style={{ fontWeight: "bold", color: currentlyPlayingSongIndex === idx ? "#96471a" : "#968e1a" }} display="inline" variant="body1">{idx + 1}. {song.title} by {song.artist}</Typography>
-                                    {/* </Card> */}
                                 </Grid>
                             )
                         })}
@@ -153,7 +155,7 @@ export const HomeWrapper = () => {
 
             const handleDragStart = (index: number) => {
                 return (event: React.DragEvent) => {
-                    event.dataTransfer.setData("song", ""+index);
+                    event.dataTransfer.setData("song", "" + index);
                 }
             }
 
@@ -284,15 +286,23 @@ export const HomeWrapper = () => {
                 if (a.dislikes > b.dislikes) return -1;
                 if (a.dislikes < b.dislikes) return 1;
                 return 0;
-            } 
+            }
         }
     });
-    console.log(playlistsSorted);
+
+    const handleSelectCardClicked = (playlist: Playlist) => {
+        return (e: React.SyntheticEvent) => {
+            store.setSelectedPlaylist(playlist);
+        }
+    }
+
+    // console.log(playlistsSorted);
     const playlistEls = playlistsSorted.map((playlist: Playlist) => {
+        const backgroundColor = isSelected(playlist) ? " #ffdd99" : (playlist.isPublished ? "#cce6ff" : "initial");
         return {
             key: playlist._id,
-            el: (<Card sx={{ m: 1 }}>
-                <CardActionArea>
+            el: (<Card sx={{ m: 1, backgroundColor: backgroundColor }}>
+                <CardActionArea onClick={handleSelectCardClicked(playlist)}>
                     <CardContent>
                         <Grid container>
                             <Grid item xs={8}>
@@ -304,13 +314,13 @@ export const HomeWrapper = () => {
                     </CardContent>
                 </CardActionArea>
                 <CardContent sx={{ pt: 0, pb: 0 }}>
-                    {isSelected(playlist) ?
+                    {isExpanded(playlist) ?
                         playlistInner(playlist)
                         : <></>}
                 </CardContent>
                 <CardActions sx={{ p: 0, float: "right" }}>
                     <IconButton onClick={handleExpand(playlist)}>
-                        {isSelected(playlist) ? <KeyboardDoubleArrowUpIcon /> : <KeyboardDoubleArrowDownIcon />}
+                        {isExpanded(playlist) ? <KeyboardDoubleArrowUpIcon /> : <KeyboardDoubleArrowDownIcon />}
                     </IconButton>
                 </CardActions>
             </Card>)

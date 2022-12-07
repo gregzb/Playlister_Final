@@ -24,7 +24,9 @@ export enum GlobalStoreActionType {
     CHANGE_EXPANDED_PLAYLIST,
     UPDATE_PLAYLIST,
     CHANGE_MODAL,
-    CHANGE_MARKED_SONG_INDEX
+    CHANGE_MARKED_SONG_INDEX,
+    CHANGE_SELECTED_PLAYLIST,
+    CHANGE_PLAYING_SONG_INDEX,
 };
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -67,6 +69,8 @@ const defaultStoreState: {
     loadedPlaylists: Playlist[],
     expandedPlaylist: Playlist | null,
     markedSongIndex: number,
+    selectedPlaylist: Playlist | null,
+    playingSongIndex: number,
 
     setHomeView?: (newView: HomeView) => void,
     setUnpublishedSortDirection?: (_: UnpublishedSortDirection) => void,
@@ -87,6 +91,8 @@ const defaultStoreState: {
     deleteExpandedPlaylist?: () => void,
     setModal?: (modal: ModalType) => void,
     setMarkedSongIndex?: (index: number) => void,
+    setSelectedPlaylist?: (playlist: Playlist) => void,
+    setPlayingSongIndex?: (index: number) => void,
 
     clearAllTransactions?: () => void,
     addCreateSongTransaction?: (index: number, title: string, artist: string, youTubeId: string) => void,
@@ -112,6 +118,8 @@ const defaultStoreState: {
     loadedPlaylists: [],
     expandedPlaylist: null,
     markedSongIndex: -1,
+    selectedPlaylist: null,
+    playingSongIndex: -1,
 };
 
 export const GlobalStoreContext = createContext(defaultStoreState);
@@ -169,7 +177,8 @@ export const GlobalStoreContextProvider = (props: {
                     return {
                         ...prev,
                         searchText: payload,
-                        expandedPlaylist: null,
+                        // expandedPlaylist: null,
+                        // selectedPlaylist: null,
                         loadedPlaylists: nextLoadedPlaylists
                     }
                 });
@@ -202,6 +211,17 @@ export const GlobalStoreContextProvider = (props: {
                 return setStore(prev => ({
                     ...prev,
                     markedSongIndex: payload
+                }));
+            } case GlobalStoreActionType.CHANGE_SELECTED_PLAYLIST: {
+                return setStore(prev => ({
+                    ...prev,
+                    selectedPlaylist: payload,
+                    playingSongIndex: -1
+                }));
+            } case GlobalStoreActionType.CHANGE_PLAYING_SONG_INDEX: {
+                return setStore(prev => ({
+                    ...prev,
+                    playingSongIndex: payload
                 }));
             }
             // // LIST UPDATE OF ITS NAME
@@ -407,6 +427,14 @@ export const GlobalStoreContextProvider = (props: {
         //     }
         // }
         storeReducer({ type: GlobalStoreActionType.CHANGE_SEARCH_TEXT, payload: newSearchText });
+    }
+
+    store.setSelectedPlaylist = (playlist: Playlist) => {
+        storeReducer({type: GlobalStoreActionType.CHANGE_SELECTED_PLAYLIST, payload: playlist});
+    }
+
+    store.setPlayingSongIndex = (index: number) => {
+        storeReducer({type: GlobalStoreActionType.CHANGE_PLAYING_SONG_INDEX, payload: index});
     }
 
     store.loadOwnPlaylists = async () => {
