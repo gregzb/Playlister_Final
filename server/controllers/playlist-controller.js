@@ -281,7 +281,7 @@ updatePlaylistInteractions = async (req, res) => {
             }
         }
         if (body.comments) {
-            list.push(body.comments);
+            list.comments.push(body.comments);
         }
 
         if (body.listens) {
