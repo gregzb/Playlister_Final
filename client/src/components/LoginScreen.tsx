@@ -88,7 +88,7 @@ export const LoginScreen = () => {
                             <Grid item>
                                 <Link to="/register">
                                     <Typography variant="body2">
-                                        Already have an account? Sign in
+                                        Don't have an account yet? Create account
                                     </Typography>
                                 </Link>
                             </Grid>
