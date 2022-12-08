@@ -199,6 +199,11 @@ export const GlobalStoreContextProvider = (props: {
             } case GlobalStoreActionType.UPDATE_PLAYLIST: {
                 return setStore(prev => {
                     const idx = prev.loadedPlaylists.findIndex((playlist) => playlist._id === payload._id);
+                    if (idx == -1) {
+                        return {
+                            ...prev
+                        };
+                    }
                     const updatedPlaylists = [...prev.loadedPlaylists.slice(0, idx), payload, ...prev.loadedPlaylists.slice(idx + 1)];
                     return {
                         ...prev,

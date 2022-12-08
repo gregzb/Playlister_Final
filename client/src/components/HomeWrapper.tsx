@@ -329,15 +329,15 @@ export const HomeWrapper = () => {
     const onClickLike = (playlist: Playlist) => {
         return (e: React.SyntheticEvent) => {
             e.stopPropagation();
-            if (playlist.likes.includes(auth.user.username)) {
-                const index = playlist.likes.indexOf(auth.user.username);
+            if (playlist.likes.includes(auth.user?.username)) {
+                const index = playlist.likes.indexOf(auth.user?.username);
                 playlist.likes.splice(index, 1);
             } else {
-                if (playlist.dislikes.includes(auth.user.username)) {
-                    const index = playlist.dislikes.indexOf(auth.user.username);
+                if (playlist.dislikes.includes(auth.user?.username)) {
+                    const index = playlist.dislikes.indexOf(auth.user?.username);
                     playlist.dislikes.splice(index, 1);
                 }
-                playlist.likes.push(auth.user.username);
+                playlist.likes.push(auth.user?.username);
             }
 
             store.updatePlaylistInteractions(playlist);
@@ -347,15 +347,15 @@ export const HomeWrapper = () => {
     const onClickDislike = (playlist: Playlist) => {
         return (e: React.SyntheticEvent) => {
             e.stopPropagation();
-            if (playlist.dislikes.includes(auth.user.username)) {
-                const index = playlist.dislikes.indexOf(auth.user.username);
+            if (playlist.dislikes.includes(auth.user?.username)) {
+                const index = playlist.dislikes.indexOf(auth.user?.username);
                 playlist.dislikes.splice(index, 1);
             } else {
-                if (playlist.likes.includes(auth.user.username)) {
-                    const index = playlist.likes.indexOf(auth.user.username);
+                if (playlist.likes.includes(auth.user?.username)) {
+                    const index = playlist.likes.indexOf(auth.user?.username);
                     playlist.likes.splice(index, 1);
                 }
-                playlist.dislikes.push(auth.user.username);
+                playlist.dislikes.push(auth.user?.username);
             }
 
             store.updatePlaylistInteractions(playlist);
@@ -383,13 +383,13 @@ export const HomeWrapper = () => {
                                     <Grid container>
                                         <Grid item xs={6}>
                                             <IconButton disabled={!auth.loggedIn} component={Box} onClick={onClickLike(playlist)} size="large">
-                                                <ThumbUpIcon style={{color: playlist.likes.includes(auth.user.username) ? "green" : "initial"}} />
+                                                <ThumbUpIcon style={{color: playlist.likes.includes(auth.user?.username) ? "green" : "initial"}} />
                                             </IconButton>
                                             <Typography display="inline" variant="body1">{playlist.likes.length}</Typography>
                                         </Grid>
                                         <Grid item xs={6}>
                                             <IconButton disabled={!auth.loggedIn} component={Box} onClick={onClickDislike(playlist)} size="large">
-                                                <ThumbDownIcon style={{color: playlist.dislikes.includes(auth.user.username) ? "red" : "initial"}} />
+                                                <ThumbDownIcon style={{color: playlist.dislikes.includes(auth.user?.username) ? "red" : "initial"}} />
                                             </IconButton>
                                             <Typography display="inline" variant="body1">{playlist.dislikes.length}</Typography>
                                         </Grid>

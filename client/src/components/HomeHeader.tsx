@@ -64,6 +64,10 @@ export const HomeHeader = () => {
         }
     };
 
+    useEffect(() => {
+        setTmpSearchText(store.searchText ?? "");
+    }, [store.searchText]);
+
     const viewingPublished = store.currentHomeView === HomeView.OWN;
     const menuSortItems = viewingPublished ? [
         <MenuItem key="name" onClick={handleCloseSortMenuUnpublished(UnpublishedSortDirection.NAME)}>Name (A-Z)</MenuItem>,

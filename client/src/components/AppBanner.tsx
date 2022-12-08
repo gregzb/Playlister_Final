@@ -64,7 +64,7 @@ export const AppBanner = () => {
     return (
         <AppBar sx={{ bgcolor: "rgb(224,224,224)" }} position="static">
             <Toolbar>
-                <Link to="/">
+                <Link to={auth.loggedIn ? "/home" : "/"}>
                     <Box sx={imageHeight}>
                         <img height="100%" src={logoUrl}></img>
                     </Box>
