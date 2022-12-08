@@ -30,7 +30,15 @@ createPlaylist = async (req, res) => {
     body.ownerEmail = user.email;
     body.username = user.username;
 
-    if (body.name === "") body.name = `Untitled ${user.playlists.length}`
+    if (body.name === "") {
+        body.name = `Untitled ${user.playlists.length}`;
+        let playlistFound = null;
+        do {
+            playlistFound = await Playlist.findOne({ownerEmail: body.ownerEmail, name: body.name});
+            if (playlistFound) body.name += " 2";
+            else break;
+        } while (true);
+    }
 
     body.likes = [];
     body.dislikes = [];
@@ -256,10 +264,33 @@ updatePlaylistInteractions = async (req, res) => {
         // if (list.isPublished) {
         //     list.publishDate = new Date();
         // }
-        list.likes = body.likes;
-        list.dislikes = body.dislikes;
-        list.comments = body.comments;
-        list.listens = body.listens;
+        if (body.likes) {
+            if (list.likes.includes(body.likes)) {
+                const index = list.likes.indexOf(body.likes);
+                list.likes.splice(index, 1);
+            } else {
+                list.likes.push(body.likes);
+            }
+        }
+        if (body.dislikes) {
+            if (list.dislikes.includes(body.dislikes)) {
+                const index = list.dislikes.indexOf(body.dislikes);
+                list.dislikes.splice(index, 1);
+            } else {
+                list.dislikes.push(body.dislikes);
+            }
+        }
+        if (body.comments) {
+            list.push(body.comments);
+        }
+
+        if (body.listens) {
+            list.listens += body.listens;
+        }
+        // list.likes = body.likes;
+        // list.dislikes = body.dislikes;
+        // list.comments = body.comments;
+        // list.listens = body.listens;
         list
             .save()
             .then(() => {
@@ -308,7 +339,7 @@ getOwnPlaylists = async (req, res) => {
                 return res.status(200).json({ error: false, playlists: playlists })
             });
         }
-        asyncFindLists(user.email);
+        asyncFindLists(user?.email);
     });
 }
 
