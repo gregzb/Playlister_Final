@@ -343,7 +343,7 @@ export const HomeWrapper = () => {
             // store.updatePlaylistInteractions(playlist);
 
             // @ts-ignore
-            const updateObj = {_id: playlist._id, likes: null, dislikes: null, comments: null, listens: null};
+            const updateObj = { _id: playlist._id, likes: null, dislikes: null, comments: null, listens: null };
             if (playlist.dislikes.includes(auth.user?.username)) {
                 updateObj.dislikes = auth.user?.username;
             }
@@ -369,7 +369,7 @@ export const HomeWrapper = () => {
             // }
 
             // @ts-ignore
-            const updateObj = {_id: playlist._id, likes: null, dislikes: null, comments: null, listens: null};
+            const updateObj = { _id: playlist._id, likes: null, dislikes: null, comments: null, listens: null };
             if (playlist.likes.includes(auth.user?.username)) {
                 updateObj.likes = auth.user?.username;
             }
@@ -401,13 +401,13 @@ export const HomeWrapper = () => {
                                     <Grid container>
                                         <Grid item xs={6}>
                                             <IconButton disabled={!auth.loggedIn} component={Box} onClick={onClickLike(playlist)} size="large">
-                                                <ThumbUpIcon style={{color: playlist.likes.includes(auth.user?.username) ? "green" : "initial"}} />
+                                                <ThumbUpIcon style={{ color: playlist.likes.includes(auth.user?.username) ? "green" : "initial" }} />
                                             </IconButton>
                                             <Typography display="inline" variant="body1">{playlist.likes.length}</Typography>
                                         </Grid>
                                         <Grid item xs={6}>
                                             <IconButton disabled={!auth.loggedIn} component={Box} onClick={onClickDislike(playlist)} size="large">
-                                                <ThumbDownIcon style={{color: playlist.dislikes.includes(auth.user?.username) ? "red" : "initial"}} />
+                                                <ThumbDownIcon style={{ color: playlist.dislikes.includes(auth.user?.username) ? "red" : "initial" }} />
                                             </IconButton>
                                             <Typography display="inline" variant="body1">{playlist.dislikes.length}</Typography>
                                         </Grid>

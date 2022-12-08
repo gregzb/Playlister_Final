@@ -88,7 +88,7 @@ const defaultStoreState: {
     }[]) => void,
     setExpandedPlaylist?: (playlist: Playlist) => void,
     updateExpandedPlaylist?: () => void,
-    updatePlaylist?: (playlist: Playlist) => Promise<{error: boolean, alreadyExists: boolean}>,
+    updatePlaylist?: (playlist: Playlist) => Promise<{ error: boolean, alreadyExists: boolean }>,
     updatePlaylistInteractions?: (playlist: Playlist) => void,
     publishExpandedPlaylist?: () => void,
     deleteExpandedPlaylist?: () => void,
@@ -128,12 +128,29 @@ const defaultStoreState: {
 export const GlobalStoreContext = createContext(defaultStoreState);
 console.log("create GlobalStoreContext");
 
+const storeRef: { store: any } = { store: null };
+document.addEventListener('keydown', (event) => {
+    const store = storeRef.store;
+    if (!store || store.currentModal !== ModalType.NONE) return;
+    if (event.ctrlKey) {
+        if (event.key === "z") {
+            console.log("undoing");
+            store.undo();
+        } else if (event.key === "y") {
+            console.log("redo");
+            store.redo();
+        }
+    }
+});
+
 export const GlobalStoreContextProvider = (props: {
     children: React.ReactNode
 }) => {
     // THESE ARE ALL THE THINGS OUR DATA STORE WILL MANAGE
     const [store, setStore] = useState(defaultStoreState);
     const history = useNavigate();
+
+    storeRef.store = store;
 
     console.log("inside useGlobalStore");
 
@@ -438,11 +455,11 @@ export const GlobalStoreContextProvider = (props: {
     }
 
     store.setSelectedPlaylist = (playlist: Playlist) => {
-        storeReducer({type: GlobalStoreActionType.CHANGE_SELECTED_PLAYLIST, payload: playlist});
+        storeReducer({ type: GlobalStoreActionType.CHANGE_SELECTED_PLAYLIST, payload: playlist });
     }
 
     store.setPlayingSongIndex = (index: number) => {
-        storeReducer({type: GlobalStoreActionType.CHANGE_PLAYING_SONG_INDEX, payload: index});
+        storeReducer({ type: GlobalStoreActionType.CHANGE_PLAYING_SONG_INDEX, payload: index });
     }
 
     store.loadOwnPlaylists = async () => {
@@ -571,7 +588,7 @@ export const GlobalStoreContextProvider = (props: {
         }
 
         const alreadyExists = 'alreadyExists' in response ? (response as any).alreadyExists : false;
-        return {error: response.error, alreadyExists};
+        return { error: response.error, alreadyExists };
     }
 
     store.updatePlaylistInteractions = async (playlist: Playlist) => {
