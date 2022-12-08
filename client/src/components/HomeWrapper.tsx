@@ -124,7 +124,7 @@ export const HomeWrapper = () => {
                         {playlist.songs.map((song, idx) => {
                             return (
                                 <Grid key={"" + idx + "|" + song.title + "|" + song.artist + "|" + song.youTubeId} item xs={12}>
-                                    <Typography style={{ fontWeight: "bold", color: currentlyPlayingSongIndex === idx ? "#96471a" : "#968e1a" }} display="inline" variant="body1">{idx + 1}. {song.title} by {song.artist}</Typography>
+                                    <Typography style={{ fontWeight: "bold", color: currentlyPlayingSongIndex === idx && playlist._id === store.selectedPlaylist?._id ? "#96471a" : "#968e1a" }} display="inline" variant="body1">{idx + 1}. {song.title} by {song.artist}</Typography>
                                 </Grid>
                             )
                         })}
@@ -132,8 +132,8 @@ export const HomeWrapper = () => {
 
                     <Grid item xs={12}>
                         <ButtonGroup sx={{ float: "right" }} variant="contained">
-                            <Button sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Delete</Button>
-                            <Button onClick={() => store.createPlaylist(`Copy of ${playlist.name}`, [...playlist.songs])} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Duplicate</Button>
+                            <Button disabled={!auth.loggedIn} onClick={() => store.setModal(ModalType.DELETE_LIST)} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Delete</Button>
+                            <Button disabled={!auth.loggedIn} onClick={() => store.createPlaylist(`Copy of ${playlist.name}`, [...playlist.songs])} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Duplicate</Button>
                         </ButtonGroup>
                     </Grid>
                 </Grid>
@@ -382,13 +382,13 @@ export const HomeWrapper = () => {
                                 {playlist.isPublished ?
                                     <Grid container>
                                         <Grid item xs={6}>
-                                            <IconButton component={Box} onClick={onClickLike(playlist)} size="large">
+                                            <IconButton disabled={!auth.loggedIn} component={Box} onClick={onClickLike(playlist)} size="large">
                                                 <ThumbUpIcon style={{color: playlist.likes.includes(auth.user.username) ? "green" : "initial"}} />
                                             </IconButton>
                                             <Typography display="inline" variant="body1">{playlist.likes.length}</Typography>
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <IconButton component={Box} onClick={onClickDislike(playlist)} size="large">
+                                            <IconButton disabled={!auth.loggedIn} component={Box} onClick={onClickDislike(playlist)} size="large">
                                                 <ThumbDownIcon style={{color: playlist.dislikes.includes(auth.user.username) ? "red" : "initial"}} />
                                             </IconButton>
                                             <Typography display="inline" variant="body1">{playlist.dislikes.length}</Typography>
