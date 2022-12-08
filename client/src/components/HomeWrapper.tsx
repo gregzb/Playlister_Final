@@ -365,7 +365,6 @@ export const HomeWrapper = () => {
     // console.log(playlistsSorted);
     const playlistEls = playlistsSorted.map((playlist: Playlist) => {
         const backgroundColor = isSelected(playlist) ? " #ffdd99" : (playlist.isPublished ? "#cce6ff" : "initial");
-        console.log(playlist);
         return {
             key: playlist._id,
             el: (<Card sx={{ m: 1, backgroundColor: backgroundColor }}>
@@ -441,7 +440,7 @@ export const HomeWrapper = () => {
                         }
                     </Grid>
                 </Grid>
-                <Grid item xs={5}>
+                <Grid item xs={5} style={{ height: "100%" }}>
                     <SelectedPlaylistView />
                 </Grid>
             </Grid>
