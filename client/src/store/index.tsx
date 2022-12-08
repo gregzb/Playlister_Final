@@ -483,14 +483,14 @@ export const GlobalStoreContextProvider = (props: {
         }
         if (!includesName(name)) {
             const res = await createPlaylist(name, songs);
-            store.loadPlaylistsWrapper(HomeView.OWN);
+            if (store.currentHomeView === HomeView.OWN) store.loadPlaylistsWrapper(HomeView.OWN);
         } else {
             let counter = 2;
             while (includesName(name + " " + counter)) {
                 counter++;
             }
             const res = await createPlaylist(name + " " + counter, songs);
-            store.loadPlaylistsWrapper(HomeView.OWN);
+            if (store.currentHomeView === HomeView.OWN) store.loadPlaylistsWrapper(HomeView.OWN);
         }
     }
 

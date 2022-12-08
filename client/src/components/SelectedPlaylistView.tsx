@@ -81,7 +81,11 @@ export const SelectedPlaylistView = () => {
         playerRef?.current?.getInternalPlayer()?.playVideo();
         if (!shouldBePlaying) {
             store.selectedPlaylist.listens++;
-            store.updatePlaylistInteractions(store.selectedPlaylist);
+
+            // @ts-ignore
+            const updateObj = {_id: store.selectedPlaylist._id, likes: null, dislikes: null, comments: null, listens: 1};
+            // @ts-ignore
+            store.updatePlaylistInteractions(updateObj);
         }
         setShouldBePlaying(true);
     }
@@ -128,7 +132,11 @@ export const SelectedPlaylistView = () => {
         if (e.key === "Enter") {
             if (!tmpCommentText) return;
             store.selectedPlaylist.comments.push({ username: auth.user?.username, text: tmpCommentText });
-            store.updatePlaylistInteractions(store.selectedPlaylist);
+            // store.updatePlaylistInteractions(store.selectedPlaylist);
+            // @ts-ignore
+            const updateObj = {_id: store.selectedPlaylist._id, likes: null, dislikes: null, comments: { username: auth.user?.username, text: tmpCommentText }, listens: null};
+            // @ts-ignore
+            store.updatePlaylistInteractions(updateObj);
             setTmpCommentText("");
         }
     }
@@ -139,7 +147,7 @@ export const SelectedPlaylistView = () => {
         } else {
             event.target.pauseVideo();
         }
-      }
+    }
 
     return (
         <div style={{ width: "100%", height: "100%" }}>

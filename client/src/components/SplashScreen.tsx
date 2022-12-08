@@ -52,7 +52,7 @@ export const SplashScreen = () => {
 
                 <Grid item xs={12}>
                     <Box sx={{ "textAlign": "center" }}>
-                        <Button sx={{ m: 1 }} onClick={() => navigate("/register")} variant="contained">Register</Button>
+                        <Button sx={{ m: 1 }} onClick={() => navigate("/register")} variant="contained">Create Account</Button>
                         <Button sx={{ m: 1 }} onClick={() => navigate("/login")} variant="contained">Login</Button>
                         <Button sx={{ m: 1 }} onClick={() => navigate("/home")} variant="contained">Continue as Guest</Button>
                     </Box>

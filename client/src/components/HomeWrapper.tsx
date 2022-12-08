@@ -132,8 +132,8 @@ export const HomeWrapper = () => {
 
                     <Grid item xs={12}>
                         <ButtonGroup sx={{ float: "right" }} variant="contained">
-                            <Button disabled={!auth.loggedIn} onClick={() => store.setModal(ModalType.DELETE_LIST)} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Delete</Button>
-                            <Button disabled={!auth.loggedIn} onClick={() => store.createPlaylist(`Copy of ${playlist.name}`, [...playlist.songs])} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Duplicate</Button>
+                            <Button disabled={!auth.loggedIn || auth.user.username !== playlist.username} onClick={() => store.setModal(ModalType.DELETE_LIST)} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Delete</Button>
+                            <Button disabled={!auth.loggedIn} onClick={() => store.createPlaylist(`${playlist.name}`, [...playlist.songs])} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Duplicate</Button>
                         </ButtonGroup>
                     </Grid>
                 </Grid>
@@ -233,7 +233,7 @@ export const HomeWrapper = () => {
                             <ButtonGroup sx={{ float: "right" }} variant="contained">
                                 <Button onClick={() => store.publishExpandedPlaylist()} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Publish</Button>
                                 <Button onClick={() => store.setModal(ModalType.DELETE_LIST)} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Delete</Button>
-                                <Button onClick={() => store.createPlaylist(`Copy of ${playlist.name}`, [...playlist.songs])} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Duplicate</Button>
+                                <Button onClick={() => store.createPlaylist(`${playlist.name}`, [...playlist.songs])} sx={{ pt: 0.6, pb: 0.6, pl: 1.5, pr: 1.5 }}>Duplicate</Button>
                             </ButtonGroup>
                         </Grid>
                     </Grid>
@@ -329,36 +329,54 @@ export const HomeWrapper = () => {
     const onClickLike = (playlist: Playlist) => {
         return (e: React.SyntheticEvent) => {
             e.stopPropagation();
-            if (playlist.likes.includes(auth.user?.username)) {
-                const index = playlist.likes.indexOf(auth.user?.username);
-                playlist.likes.splice(index, 1);
-            } else {
-                if (playlist.dislikes.includes(auth.user?.username)) {
-                    const index = playlist.dislikes.indexOf(auth.user?.username);
-                    playlist.dislikes.splice(index, 1);
-                }
-                playlist.likes.push(auth.user?.username);
-            }
+            // if (playlist.likes.includes(auth.user?.username)) {
+            //     const index = playlist.likes.indexOf(auth.user?.username);
+            //     playlist.likes.splice(index, 1);
+            // } else {
+            //     if (playlist.dislikes.includes(auth.user?.username)) {
+            //         const index = playlist.dislikes.indexOf(auth.user?.username);
+            //         playlist.dislikes.splice(index, 1);
+            //     }
+            //     playlist.likes.push(auth.user?.username);
+            // }
 
-            store.updatePlaylistInteractions(playlist);
+            // store.updatePlaylistInteractions(playlist);
+
+            // @ts-ignore
+            const updateObj = {_id: playlist._id, likes: null, dislikes: null, comments: null, listens: null};
+            if (playlist.dislikes.includes(auth.user?.username)) {
+                updateObj.dislikes = auth.user?.username;
+            }
+            updateObj.likes = auth.user?.username;
+
+            // @ts-ignore
+            store.updatePlaylistInteractions(updateObj);
         };
     }
 
     const onClickDislike = (playlist: Playlist) => {
         return (e: React.SyntheticEvent) => {
             e.stopPropagation();
-            if (playlist.dislikes.includes(auth.user?.username)) {
-                const index = playlist.dislikes.indexOf(auth.user?.username);
-                playlist.dislikes.splice(index, 1);
-            } else {
-                if (playlist.likes.includes(auth.user?.username)) {
-                    const index = playlist.likes.indexOf(auth.user?.username);
-                    playlist.likes.splice(index, 1);
-                }
-                playlist.dislikes.push(auth.user?.username);
-            }
+            // if (playlist.dislikes.includes(auth.user?.username)) {
+            //     const index = playlist.dislikes.indexOf(auth.user?.username);
+            //     playlist.dislikes.splice(index, 1);
+            // } else {
+            //     if (playlist.likes.includes(auth.user?.username)) {
+            //         const index = playlist.likes.indexOf(auth.user?.username);
+            //         playlist.likes.splice(index, 1);
+            //     }
+            //     playlist.dislikes.push(auth.user?.username);
+            // }
 
-            store.updatePlaylistInteractions(playlist);
+            // @ts-ignore
+            const updateObj = {_id: playlist._id, likes: null, dislikes: null, comments: null, listens: null};
+            if (playlist.likes.includes(auth.user?.username)) {
+                updateObj.likes = auth.user?.username;
+            }
+            updateObj.dislikes = auth.user?.username;
+
+            // @ts-ignore
+            store.updatePlaylistInteractions(updateObj);
         };
     }
 
